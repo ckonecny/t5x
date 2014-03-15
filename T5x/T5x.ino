@@ -73,7 +73,7 @@ rc::AIPin g_aPins[4] =
 };
 
 // ch 8
-rc::AIPin g_PotiAIPin(A6);                                     // Potentiometer on A6, no Input system assigned
+rc::AIPin g_PotiAIPin(A6);            // Potentiometer on A6, no Input system assigned
 
 
 ////////// Switches ///////////////
@@ -169,10 +169,10 @@ void setup()
   	tSwitchState = g_ch7In.read();
         if (tSwitchState == rc::SwitchState_Up)     
         {
-          rc::g_Buzzer.setPin(TX_BUZZER_PIN);  // buzzer on
+          rc::g_Buzzer.setPin(TX_BUZZER_PIN);  // buzzer on -  NORMAL MODE
           digitalWrite(TX_LED_PIN, HIGH);      // turns the LED on
         } 
-        else rc::g_Buzzer.setPin(TX_LED_PIN);  // buzzer off (use LED instead)
+        else rc::g_Buzzer.setPin(TX_LED_PIN);  // buzzer off - SILENCE MODE (use LED instead)
 
         
         rc::g_Buzzer.beep(600, 0, 0);
