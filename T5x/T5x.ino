@@ -172,11 +172,10 @@ void setup()
 	// set calibration values, these depend on hardware configurations
         
         for(int i=0; i<4; i++)
-          for(int j=0; j<3; j++)
-          {
-            g_aPins[i].setCalibration(g_AnalogSettings[i].Calibration[j], g_AnalogSettings[i].Calibration[j],  g_AnalogSettings[i].Calibration[j]);
+        {
+            g_aPins[i].setCalibration(g_AnalogSettings[i].Calibration[0], g_AnalogSettings[i].Calibration[1],  g_AnalogSettings[i].Calibration[2]);
             g_aPins[i].setReverse(g_AnalogSettings[i].Reverse);  
-          }
+    	}
 	
         g_PotiAIPin.setCalibration(0,512,1023);
         
@@ -212,7 +211,7 @@ void loop()
   
         g_Frsky.update();    // read telemetry data from serial link and update the values
        
-        if ((now - last >= 3000)) {
+        if ((now - last >= g_Telemetry_Check_Interval)) {
           last = now;
           int voltageTX = analogRead(TX_VOLT_PIN);
           if (voltageTX < g_V_TX[RED]) rc::g_Buzzer.beep(10,10,2);
@@ -221,8 +220,8 @@ void loop()
           if (g_Frsky.m_A1_Voltage < g_Profile[g_ActiveProfile].V_A1[RED]) rc::g_Buzzer.beep(10,10,2);
           else if (g_Frsky.m_A1_Voltage < g_Profile[g_ActiveProfile].V_A1[ORANGE]) rc::g_Buzzer.beep(20);
 
-    //      if (g_Frsky.m_RSSI < g_RSSI[RED]) rc::g_Buzzer.beep(10,10,2);
-    //      else if (g_Frsky.m_RSSI < g_RSSI[ORANGE]) rc::g_Buzzer.beep(20);
+          if (g_Frsky.m_RSSI < g_RSSI[RED]) rc::g_Buzzer.beep(10,10,2);
+          else if (g_Frsky.m_RSSI < g_RSSI[ORANGE]) rc::g_Buzzer.beep(20);
         }
 
 

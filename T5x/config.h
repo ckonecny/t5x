@@ -47,8 +47,9 @@ const tx5::Profile_t g_Profile[] =
  }                ////////////////////////////////////////////////////////////////////////////////////////////////////////
 };
 
-const uint16_t  g_V_TX[]={328,307};    // TX Voltage [0-1023]   Warning Level ORANGE, RED (0-15V in 1023 steps or 0,0146V per step)                             
-const uint8_t   g_RSSI[]={30,20};      // receiver signal strength indicator.   
+const uint16_t  g_V_TX[]={328,307};                // TX Voltage [0-1023]   Warning Level ORANGE, RED (0-15V in 1023 steps or 0,0146V per step)                             
+const uint8_t   g_RSSI[]={98,90};                  // receiver signal strength indicator.
+const uint16_t  g_Telemetry_Check_Interval=3000;   // Tx Voltage, RSSI, A1 Voltage & A2 Voltage are to be checked every XXX ms. 
 
 
 
@@ -58,8 +59,8 @@ const tx5::AnalogSettings_t g_AnalogSettings[]=
 {
   {{93, 520, 965}, true},        //A0 {MIN, MID, MAX}, ChannelReverse 
   {{35, 493, 937}, false},       //A1 {MIN, MID, MAX}, ChannelReverse 
-  {{62, 530, 953}, true},        //A2 {MIN, MID, MAX}, ChannelReverse 
-  {{64, 520, 996}, true}         //A3 {MIN, MID, MAX}, ChannelReverse 
+  {{26, 510, 920}, true},        //A2 {MIN, MID, MAX}, ChannelReverse 
+  {{83, 500, 950}, true}         //A3 {MIN, MID, MAX}, ChannelReverse 
 };
 
 #define TX_VOLT_PIN    A7        // voltage sensor on A7 
