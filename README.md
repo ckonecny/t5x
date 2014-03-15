@@ -1,7 +1,7 @@
 t5x
 ===
 
-An Open Source RC Transmitter implementation for Arduino 328p (nano) based on Arduino RC Library and inspired by Der-Frickler.net's approach.
+An Open Source RC Transmitter implementation for Arduino 328p (nano) based on [Arduino RC Library](http://sourceforge.net/projects/arduinorclib/) and inspired by [Der-Frickler.net](http://der-frickler.net/technik/9xown#simu_tx) approach.
 Project Details to be found here: http://fpv-community.de/showthread.php?41460-Turnigy-5x-Arduino-RcLib-Hacking-Mainboard
 
 Instructions: 
