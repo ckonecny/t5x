@@ -164,10 +164,19 @@ void setup()
 	rc::Timer1::init();
 	rc::Timer2::init();
 	
-        rc::g_Buzzer.setPin(TX_BUZZER_PIN);
+         // read switch to enable/disable buzzer (silence mode)
+  	tSwitchState = g_ch7In.read();
+        if (tSwitchState == rc::SwitchState_Up)     
+        {
+          rc::g_Buzzer.setPin(TX_BUZZER_PIN);  // buzzer on
+          digitalWrite(TX_LED_PIN, HIGH);      // turns the LED on
+        } 
+        else rc::g_Buzzer.setPin(TX_LED_PIN);  // buzzer off (use LED instead)
+
+        
         rc::g_Buzzer.beep(600, 0, 0);
         
-        digitalWrite(TX_LED_PIN, HIGH);   // turns the LED on 
+
 
 	// set calibration values, these depend on hardware configurations
         
@@ -213,12 +222,12 @@ void loop()
        
         if ((now - last >= g_Telemetry_Check_Interval)) {
           last = now;
-          int voltageTX = analogRead(TX_VOLT_PIN);
+          float voltageTX = analogRead(TX_VOLT_PIN)*0.0146627565982405; // 0-15V in 1023 steps or 0,0146V per step
           if (voltageTX < g_V_TX[RED]) rc::g_Buzzer.beep(10,10,2);
           else if (voltageTX < g_V_TX[ORANGE]) rc::g_Buzzer.beep(20);
 
-          if (g_Frsky.m_A1_Voltage < g_Profile[g_ActiveProfile].V_A1[RED]) rc::g_Buzzer.beep(10,10,2);
-          else if (g_Frsky.m_A1_Voltage < g_Profile[g_ActiveProfile].V_A1[ORANGE]) rc::g_Buzzer.beep(20);
+          if (g_Frsky.m_A1_Voltage*0.0517647058823529 < g_Profile[g_ActiveProfile].V_A1[RED]) rc::g_Buzzer.beep(10,10,2);     //  0-13,2V in 255 steps or 0,052V per step
+          else if (g_Frsky.m_A1_Voltage*0.0517647058823529 < g_Profile[g_ActiveProfile].V_A1[ORANGE]) rc::g_Buzzer.beep(20);  //  0-13,2V in 255 steps or 0,052V per step
 
           if (g_Frsky.m_RSSI < g_RSSI[RED]) rc::g_Buzzer.beep(10,10,2);
           else if (g_Frsky.m_RSSI < g_RSSI[ORANGE]) rc::g_Buzzer.beep(20);
@@ -275,10 +284,7 @@ void loop()
 	// since more than one channel may use the same output as source.
 	
 	// perform channel transformations and set channel values
-	for (uint8_t i = 0; i < ChannelCount; ++i)
-	{
-		g_channels[i].apply();
-	}
+	for (uint8_t i = 0; i < ChannelCount; ++i) g_channels[i].apply();
 	
         // Channel 8 is handled outside the input output system, hence apply the values directly
         g_channels[7].apply(g_PotiAIPin.read());

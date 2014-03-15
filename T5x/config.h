@@ -1,4 +1,4 @@
- #include "Tx5Types.h"
+#include "Tx5Types.h"
 
 
 
@@ -13,8 +13,8 @@ const tx5::Profile_t g_Profile[] =
   {100,100,100},  // ELEVON  DUAL RATE [0/+140]   Flight Mode 1 2 3 
   {100,100,100},  // RUDDER  DUAL RATE [0/+140]   Flight Mode 1 2 3 
 
-  {135,129},      // TELEMETRY A1 VOLTAGE [0-255] Warning Level ORANGE, RED (0-13,2V in 255 steps or 0,052V per step)
-  {0,0},          // TELEMETRY A2 VOLTAGE [0-255] Warning Level ORANGE, RED (without divider 0-3,3V in 255 steps or 0,013V per step)  
+  {7.0, 6.6},     // TELEMETRY A1 VOLTAGE Warning Level ORANGE, RED
+  {0,0},          // TELEMETRY A2 VOLTAGE Warning Level ORANGE, RED (Note: without divider 0-3,3V in 255 steps or 0,013V per step)  
   600             // FLIGHT TIMER (seconds)
  },               ////////////////////////////////////////////////////////////////////////////////////////////////////////
  
@@ -27,8 +27,8 @@ const tx5::Profile_t g_Profile[] =
   {100,100,100},  // ELEVON  DUAL RATE [0/+140]   Flight Mode 1 2 3 
   {100,100,100},  // RUDDER  DUAL RATE [0/+140]   Flight Mode 1 2 3 
 
-  {0,0},          // TELEMETRY A1 VOLTAGE [0-255] Warning Level ORANGE, RED (0-13,2V in 255 steps or 0,052V per step)
-  {0,0},          // TELEMETRY A2 VOLTAGE [0-255] Warning Level ORANGE, RED (without divider 0-3,3V in 255 steps or 0,013V per step)  
+  {0.0, 0.0},     // TELEMETRY A1 VOLTAGE Warning Level ORANGE, RED
+  {0.0 ,0.0},     // TELEMETRY A2 VOLTAGE Warning Level ORANGE, RED (Note: without divider 0-3,3V in 255 steps or 0,013V per step)  
   600             // FLIGHT TIMER (seconds)
  },               ////////////////////////////////////////////////////////////////////////////////////////////////////////
  
@@ -41,15 +41,15 @@ const tx5::Profile_t g_Profile[] =
   {100,100,100},  // ELEVON  DUAL RATE [0/+140]   Flight Mode 1 2 3 
   {100,100,100},  // RUDDER  DUAL RATE [0/+140]   Flight Mode 1 2 3 
 
-  {0,0},          // TELEMETRY A1 VOLTAGE [0-255] Warning Level ORANGE, RED (0-13,2V in 255 steps or 0,052V per step)
-  {0,0},          // TELEMETRY A2 VOLTAGE [0-255] Warning Level ORANGE, RED (without divider 0-3,3V in 255 steps or 0,013V per step)  
+  {0.0, 0.0},     // TELEMETRY A1 VOLTAGE Warning Level ORANGE, RED
+  {0.0 ,0.0},     // TELEMETRY A2 VOLTAGE Warning Level ORANGE, RED (Note: without divider 0-3,3V in 255 steps or 0,013V per step)  
   600             // FLIGHT TIMER (seconds)
  }                ////////////////////////////////////////////////////////////////////////////////////////////////////////
 };
 
-const uint16_t  g_V_TX[]={328,307};                // TX Voltage [0-1023]   Warning Level ORANGE, RED (0-15V in 1023 steps or 0,0146V per step)                             
-const uint8_t   g_RSSI[]={98,90};                  // receiver signal strength indicator.
-const uint16_t  g_Telemetry_Check_Interval=3000;   // Tx Voltage, RSSI, A1 Voltage & A2 Voltage are to be checked every XXX ms. 
+const float     g_V_TX[]={4.7, 4.5};               // TX Voltage Warning Level ORANGE, RED                              
+const uint8_t   g_RSSI[]={40,30};                  // receiver signal strength indicator [0-127]
+const uint16_t  g_Telemetry_Check_Interval=8000;   // Tx Voltage, RSSI, A1 Voltage & A2 Voltage are to be checked every XXX ms. 
 
 
 
