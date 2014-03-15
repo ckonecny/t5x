@@ -19,10 +19,11 @@
   *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA  
   *                                                                           
   *****************************************************************************
-  *                                                                           
-  *  SimuTX.ino
-  *  Kleiner RC Sender mit Frsky Akku Telemetrie
-  * 
+  *  T5x - an arduino based simple RC transmitter  
+  *
+  *  see more at:  
+  *  https://github.com/ckonecny/t5x  
+  *
   *  Based on the ArduinoRCLib transmitter example.
   *  Website: http://sourceforge.net/p/arduinorclib/                                                                     
   *                                                                           
@@ -43,7 +44,7 @@
 #include <Buzzer.h>
 #include <Timer2.h>
 
-// Tx5 includes
+// t5x includes
 #include "config.h"
 #include "Frsky.h"
 
@@ -132,7 +133,7 @@ rc::InputToOutputPipe g_aux3(    rc::Input_PIT, rc::Output_PIT);
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
-tx5::Frsky g_Frsky;
+t5x::Frsky g_Frsky;
 
 
 unsigned long last = 0;

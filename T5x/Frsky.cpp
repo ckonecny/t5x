@@ -2,7 +2,7 @@
 #include <arduino.h>
 
 
-namespace tx5
+namespace t5x
 {
 
 Frsky::Frsky()

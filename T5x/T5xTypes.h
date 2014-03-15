@@ -1,6 +1,6 @@
 #include <arduino.h>
 
-namespace tx5
+namespace t5x
 {
 
 // (Model) Profiles are holding model related information/configuration values. 
