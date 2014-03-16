@@ -2,7 +2,7 @@
 
 
 
-const t5x::Profile_t g_Profile[] =
+const t5x::Profile_t cfg_Profile[] =
 {
  {                ///////////////////// PROFILE 1 ////////////////////////////////////////////////////////////////////////
   {0,0,0},        // AILERON EXPO [-100/+100]     Flight Mode 1 2 3 
@@ -47,15 +47,14 @@ const t5x::Profile_t g_Profile[] =
  }                ////////////////////////////////////////////////////////////////////////////////////////////////////////
 };
 
-const float     g_V_TX[]={4.7, 4.5};               // TX Voltage Warning Level ORANGE, RED                              
-const uint8_t   g_RSSI[]={40,30};                  // receiver signal strength indicator [0-127] Warning Level ORANGE, RED
-const uint16_t  g_Telemetry_Check_Interval=8000;   // Tx Voltage, RSSI, A1 Voltage & A2 Voltage are to be checked every XXX ms. 
-
-
+const float     cfg_V_TX[] =                       { 4.7,  4.5};   // TX Voltage Warning Level ORANGE, RED                              
+const uint8_t   cfg_RSSI[] =                       {40  , 30  };   // receiver signal strength indicator [0-127] Warning Level ORANGE, RED
+const uint16_t  cfg_Telemetry_Check_Interval =             8000;   // Tx Voltage, RSSI, A1 Voltage & A2 Voltage are to be checked every XXX ms. 
+const int16_t   cfg_FlightTimeTrigger_ThrottleVal =        -200;   // Throttle Value that triggers the Flight Timer
 
 
 // use the AnalogReadSerial.ino sketch to determine the MIN, MID and MAX values for the main analog inputs
-const t5x::AnalogSettings_t g_AnalogSettings[]=
+const t5x::AnalogSettings_t cfg_AnalogSettings[]=
 {
   {{93, 520, 965}, true},        //A0 {MIN, MID, MAX}, ChannelReverse 
   {{35, 493, 937}, false},       //A1 {MIN, MID, MAX}, ChannelReverse 

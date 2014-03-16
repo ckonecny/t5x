@@ -26,7 +26,7 @@
   *
   *  Based on the ArduinoRCLib transmitter example.
   *  Website: http://sourceforge.net/p/arduinorclib/                                                                     
-  *                                                                           
+  *                                                                             
   *****************************************************************************/
 
 #include <AIPin.h>
@@ -43,6 +43,7 @@
 #include <util.h>
 #include <Buzzer.h>
 #include <Timer2.h>
+#include <FlightTimer.h>
 
 // t5x includes
 #include "config.h"
@@ -134,9 +135,12 @@ rc::InputToOutputPipe g_aux3(    rc::Input_PIT, rc::Output_PIT);
 ///////////////////////////////////////////////////////////////////////
 
 t5x::Frsky g_Frsky;
+rc::FlightTimer g_Timer;
+int16_t g_TimerSecAtPaused=0;
 
+unsigned long last_telemetry    = 0;
+unsigned long last_flight_timer = 0;
 
-unsigned long last = 0;
 
 void setup()
 {
@@ -151,12 +155,12 @@ void setup()
         // initialize expo and dualrate objects with the profile specific values
         for (uint8_t i=0; i < 3; i++)
         {
-            g_ailExpo[i].set(g_Profile[g_ActiveProfile].AilExpo[i]);
-            g_eleExpo[i].set(g_Profile[g_ActiveProfile].EleExpo[i]);
-            g_rudExpo[i].set(g_Profile[g_ActiveProfile].RudExpo[i]);
-            g_ailDR[i].set(g_Profile[g_ActiveProfile].AilDR[i]);
-            g_eleDR[i].set(g_Profile[g_ActiveProfile].EleDR[i]);
-            g_rudDR[i].set(g_Profile[g_ActiveProfile].RudDR[i]);
+            g_ailExpo[i].set(cfg_Profile[g_ActiveProfile].AilExpo[i]);
+            g_eleExpo[i].set(cfg_Profile[g_ActiveProfile].EleExpo[i]);
+            g_rudExpo[i].set(cfg_Profile[g_ActiveProfile].RudExpo[i]);
+            g_ailDR[i].set(cfg_Profile[g_ActiveProfile].AilDR[i]);
+            g_eleDR[i].set(cfg_Profile[g_ActiveProfile].EleDR[i]);
+            g_rudDR[i].set(cfg_Profile[g_ActiveProfile].RudDR[i]);
         }
   
   
@@ -183,8 +187,8 @@ void setup()
         
         for(int i=0; i<4; i++)
         {
-            g_aPins[i].setCalibration(g_AnalogSettings[i].Calibration[0], g_AnalogSettings[i].Calibration[1],  g_AnalogSettings[i].Calibration[2]);
-            g_aPins[i].setReverse(g_AnalogSettings[i].Reverse);  
+            g_aPins[i].setCalibration(cfg_AnalogSettings[i].Calibration[0], cfg_AnalogSettings[i].Calibration[1],  cfg_AnalogSettings[i].Calibration[2]);
+            g_aPins[i].setReverse(cfg_AnalogSettings[i].Reverse);  
     	}
 	
         g_PotiAIPin.setCalibration(0,512,1023);
@@ -213,25 +217,28 @@ void setup()
         delay(1500);
         rc::g_Buzzer.beep(20, 10, g_ActiveProfile);      // beep g_ActiveProfile times
         delay(3000);
+        
+        g_Timer.setTarget(cfg_Profile[g_ActiveProfile].Timer);
+        g_Timer.setDirection(false);                     // count down timer
 }
 
 void loop()
 {
         unsigned long now = millis();       
-  
+ 
         g_Frsky.update();    // read telemetry data from serial link and update the values
        
-        if ((now - last >= g_Telemetry_Check_Interval)) {
-          last = now;
+        if ((now - last_telemetry >= cfg_Telemetry_Check_Interval)) {
+          last_telemetry = now;
           float voltageTX = analogRead(TX_VOLT_PIN)*0.0146627565982405; // 0-15V in 1023 steps or 0,0146V per step
-          if (voltageTX < g_V_TX[RED]) rc::g_Buzzer.beep(10,10,2);
-          else if (voltageTX < g_V_TX[ORANGE]) rc::g_Buzzer.beep(20);
+          if (voltageTX < cfg_V_TX[RED]) rc::g_Buzzer.beep(10,10,2);
+          else if (voltageTX < cfg_V_TX[ORANGE]) rc::g_Buzzer.beep(20);
 
-          if (g_Frsky.m_A1_Voltage*0.0517647058823529 < g_Profile[g_ActiveProfile].V_A1[RED]) rc::g_Buzzer.beep(10,10,2);     //  0-13,2V in 255 steps or 0,052V per step
-          else if (g_Frsky.m_A1_Voltage*0.0517647058823529 < g_Profile[g_ActiveProfile].V_A1[ORANGE]) rc::g_Buzzer.beep(20);  //  0-13,2V in 255 steps or 0,052V per step
+          if (g_Frsky.m_A1_Voltage*0.0517647058823529 < cfg_Profile[g_ActiveProfile].V_A1[RED]) rc::g_Buzzer.beep(10,10,2);     //  0-13,2V in 255 steps or 0,052V per step
+          else if (g_Frsky.m_A1_Voltage*0.0517647058823529 < cfg_Profile[g_ActiveProfile].V_A1[ORANGE]) rc::g_Buzzer.beep(20);  //  0-13,2V in 255 steps or 0,052V per step
 
-          if (g_Frsky.m_RSSI < g_RSSI[RED]) rc::g_Buzzer.beep(10,10,2);
-          else if (g_Frsky.m_RSSI < g_RSSI[ORANGE]) rc::g_Buzzer.beep(20);
+          if (g_Frsky.m_RSSI < cfg_RSSI[RED]) rc::g_Buzzer.beep(10,10,2);
+          else if (g_Frsky.m_RSSI < cfg_RSSI[ORANGE]) rc::g_Buzzer.beep(20);
         }
 
 
@@ -254,12 +261,29 @@ void loop()
 
 	
 	// read analog values, these write to the input system (AIL, ELE, THR and RUD)
-	g_aPins[0].read(); // aileron
-	g_aPins[1].read(); // elevator
-	g_aPins[2].read(); // throttle
-	g_aPins[3].read(); // rudder
+      	                       g_aPins[0].read(); // aileron
+	                       g_aPins[1].read(); // elevator
+	int16_t throttle_val = g_aPins[2].read(); // throttle 
+	                       g_aPins[3].read(); // rudder
 
-	
+        if (now - last_flight_timer >= 1000)
+        {
+          if (throttle_val > cfg_FlightTimeTrigger_ThrottleVal)  
+          {
+            if (g_TimerSecAtPaused==0) g_Timer.update(true);
+            else
+            {
+              g_Timer.setTarget(g_TimerSecAtPaused);
+              g_TimerSecAtPaused=0;
+            }
+          }
+          else
+          {
+            g_Timer.update(false);
+            g_TimerSecAtPaused=g_Timer.getTime();
+  	  }
+        }
+        
 	// apply expo and dual rates to input, these read from and write to input system
 	g_ailExpo[flightmode].apply();
 	g_ailDR[flightmode].apply();
