@@ -63,12 +63,12 @@ const t5x::AnalogSettings_t cfg_AnalogSettings[]=
 };
 
 // choose one from the two 3-state switches SW2 or SW3 which one should be evaluated for selecting active profile
-#define T5X_SW2_SELECTS_PROFILE        // SW2 selects the active profile during startup of the transmitter
-//#define T5X_SW3_SELECTS_PROFILE      // SW3 selects the active profile during startup of the transmitter
+//#define T5X_SW2_SELECTS_PROFILE        // SW2 selects the active profile during startup of the transmitter
+#define T5X_SW3_SELECTS_PROFILE          // SW3 selects the active profile during startup of the transmitter
 
 // choose one from the two 3-state switches SW2 or SW3 which one should be evaluated for selecting active flightmode
-#define T5X_SW2_SELECTS_FLIGHTMODE     // SW2 selects the active flightmode during normal operation
-//#define T5X_SW2_SELECTS_FLIGHTMODE   // SW3 selects the active flightmode during normal operation
+//#define T5X_SW2_SELECTS_FLIGHTMODE     // SW2 selects the active flightmode during normal operation
+#define T5X_SW3_SELECTS_FLIGHTMODE       // SW3 selects the active flightmode during normal operation
 
 
 // this should never be necessary to be changed
