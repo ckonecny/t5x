@@ -55,15 +55,44 @@ const int16_t   cfg_FlightTimeTrigger_ThrottleVal =        -200;   // Throttle V
 
 // use the AnalogReadSerial.ino sketch to determine the MIN, MID and MAX values for the main analog inputs
 const t5x::AnalogSettings_t cfg_AnalogSettings[]=
-{
+{                                //    Calibration     ChannelReverse
   {{93, 520, 965}, true},        //A0 {MIN, MID, MAX}, ChannelReverse 
   {{35, 493, 937}, false},       //A1 {MIN, MID, MAX}, ChannelReverse 
   {{26, 510, 920}, true},        //A2 {MIN, MID, MAX}, ChannelReverse 
   {{83, 500, 950}, true}         //A3 {MIN, MID, MAX}, ChannelReverse 
 };
 
-#define TX_VOLT_PIN    A7        // voltage sensor on A7 
-#define TX_BUZZER_PIN   8        // buzzer connected to digital pin 8
-#define TX_LED_PIN     13        // LED is on standard pin 13
+// choose one from the two 3-state switches SW2 or SW3 which one should be evaluated for selecting active profile
+#define T5X_SW2_SELECTS_PROFILE        // SW2 selects the active profile during startup of the transmitter
+//#define T5X_SW3_SELECTS_PROFILE      // SW3 selects the active profile during startup of the transmitter
+
+// choose one from the two 3-state switches SW2 or SW3 which one should be evaluated for selecting active flightmode
+#define T5X_SW2_SELECTS_FLIGHTMODE     // SW2 selects the active flightmode during normal operation
+//#define T5X_SW2_SELECTS_FLIGHTMODE   // SW3 selects the active flightmode during normal operation
 
 
+// this should never be necessary to be changed
+#define T5X_TX_VOLT_PIN    A7        // voltage sensor on A7 
+#define T5X_TX_BUZZER_PIN   8        // buzzer connected to digital pin 8
+#define T5X_TX_LED_PIN     13        // LED is on standard pin 13
+
+
+
+// check if preprocessor settings make sense, or generate error just in case of nonsense
+#if defined(T5X_SW2_SELECTS_PROFILE) && defined(T5X_SW3_SELECTS_PROFILE)
+	#error Cannot use T5X_SW2_SELECTS_PROFILE in combination with T5X_SW3_SELECTS_PROFILE
+#endif
+
+#if !defined(T5X_SW2_SELECTS_PROFILE) && !defined(T5X_SW3_SELECTS_PROFILE)
+	#error Neither T5X_SW2_SELECTS_PROFILE nor T5X_SW3_SELECTS_PROFILE is used
+#endif
+
+
+
+#if defined(T5X_SW2_SELECTS_FLIGHTMODE) && defined(T5X_SW3_SELECTS_FLIGHTMODE)
+	#error Cannot use T5X_SW2_SELECTS_FLIGHTMODE in combination with T5X_SW3_SELECTS_FLIGHTMODE
+#endif
+
+#if !defined(T5X_SW2_SELECTS_FLIGHTMODE) && !defined(T5X_SW3_SELECTS_FLIGHTMODE)
+	#error Neither T5X_SW2_SELECTS_FLIGHTMODE nor T5X_SW3_SELECTS_FLIGHTMODE is used
+#endif

@@ -149,7 +149,11 @@ void setup()
         Serial.begin(9600);
         
          // read switch to determine the actual profile to be used
+#ifdef T5X_SW2_SELECTS_PROFILE
+  	rc::SwitchState tSwitchState = g_SW2.read();
+#else
   	rc::SwitchState tSwitchState = g_SW3.read();
+#endif
         if      (tSwitchState == rc::SwitchState_Up)     g_ActiveProfile = 0;
         else if (tSwitchState == rc::SwitchState_Center) g_ActiveProfile = 1;
         else if (tSwitchState == rc::SwitchState_Down)   g_ActiveProfile = 2;
@@ -175,10 +179,10 @@ void setup()
   	tSwitchState = g_SW1.read();
         if (tSwitchState == rc::SwitchState_Up)     
         {
-          rc::g_Buzzer.setPin(TX_BUZZER_PIN);  // buzzer on -  NORMAL MODE
-          digitalWrite(TX_LED_PIN, HIGH);      // turns the LED on
+          rc::g_Buzzer.setPin(T5X_TX_BUZZER_PIN);  // buzzer on -  NORMAL MODE
+          digitalWrite(T5X_TX_LED_PIN, HIGH);      // turns the LED on
         } 
-        else rc::g_Buzzer.setPin(TX_LED_PIN);  // buzzer off - SILENCE MODE (use LED instead)
+        else rc::g_Buzzer.setPin(T5X_TX_LED_PIN);  // buzzer off - SILENCE MODE (use LED instead)
 
         
         rc::g_Buzzer.beep(600, 0, 0);
@@ -232,7 +236,7 @@ void loop()
        
         if ((now - last_telemetry >= cfg_Telemetry_Check_Interval)) {
           last_telemetry = now;
-          float voltageTX = analogRead(TX_VOLT_PIN)*0.0146627565982405; // 0-15V in 1023 steps or 0,0146V per step
+          float voltageTX = analogRead(T5X_TX_VOLT_PIN)*0.0146627565982405; // 0-15V in 1023 steps or 0,0146V per step
           if (voltageTX < cfg_V_TX[RED]) rc::g_Buzzer.beep(10,10,2);
           else if (voltageTX < cfg_V_TX[ORANGE]) rc::g_Buzzer.beep(20);
 
@@ -246,16 +250,20 @@ void loop()
 	g_SW1.read();
 	g_AnalogSW1.update();
 
-	g_SW2.read();
-	g_AnalogSW2.update();
-
+#ifdef T5X_SW2_SELECTS_FLIGHTMODE
+	rc::SwitchState fSwitchState = g_SW2.read();
+	g_SW3.read();
+#else
 	rc::SwitchState fSwitchState = g_SW3.read();
+	g_SW2.read();
+#endif
+
         int flightmode = 0;
         if      (fSwitchState == rc::SwitchState_Down)   flightmode = 0;
         else if (fSwitchState == rc::SwitchState_Center) flightmode = 1;
         else if (fSwitchState == rc::SwitchState_Up)     flightmode = 2;
   
-//	g_SW3.read();
+	g_AnalogSW2.update();
 	g_AnalogSW3.update();
 
 	
