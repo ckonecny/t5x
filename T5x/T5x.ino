@@ -73,26 +73,28 @@ rc::AIPin g_aPins[4] =
 	rc::AIPin(A3, rc::Input_RUD)
 };
 
-// ch 8
-rc::AIPin g_PotiAIPin(A6);            // Potentiometer on A6, no Input system assigned
-
-
 ////////// Switches ///////////////
 
-// ch 5 + DR/Expo
-rc::TriStateSwitch g_ch5In(4, 5, rc::Switch_B, true);
-rc::AnalogSwitch   g_ch5Switch(rc::Switch_B, rc::Input_FLP);
+// ch 5
+rc::BiStateSwitch g_SW1(3, rc::Switch_A, false, false);
+rc::AnalogSwitch  g_AnalogSW1(rc::Switch_A, rc::Input_PIT);
 
-// ch 6
-rc::TriStateSwitch g_ch6In(6, 7, rc::Switch_C, true);
-rc::AnalogSwitch   g_ch6Switch(rc::Switch_C, rc::Input_BRK);
+// ch 6 + DR/Expo
+rc::TriStateSwitch g_SW2(4, 5, rc::Switch_B, true);
+rc::AnalogSwitch   g_AnalogSW2(rc::Switch_B, rc::Input_FLP);
 
 // ch 7
-rc::BiStateSwitch g_ch7In(3, rc::Switch_A, false, false);
-rc::AnalogSwitch  g_ch7Switch(rc::Switch_A, rc::Input_PIT);
+rc::TriStateSwitch g_SW3(6, 7, rc::Switch_C, true);
+rc::AnalogSwitch   g_AnalogSW3(rc::Switch_C, rc::Input_BRK);
 
 
-uint8_t      g_ActiveProfile=0;   // holds the active profile selected by the user via 3-pos switch g_ch5In
+////////// Potentiometer ///////////////
+// ch 8
+rc::AIPin g_PotiA6(A6);            // Potentiometer on A6, no Input system assigned
+
+
+
+uint8_t      g_ActiveProfile=0;   // holds the active profile selected by the user via 3-pos switch g_SW2
 
 
 rc::Expo g_ailExpo[3] = {rc::Expo(0, rc::Input_AIL), rc::Expo(0, rc::Input_AIL), rc::Expo(0, rc::Input_AIL)}; // also specify what index of the input
@@ -111,10 +113,10 @@ rc::Channel g_channels[ChannelCount] =
 	rc::Channel(rc::Output_ELE1,  rc::OutputChannel_2),
 	rc::Channel(rc::Output_THR1,  rc::OutputChannel_3),
 	rc::Channel(rc::Output_RUD1,  rc::OutputChannel_4),
-	rc::Channel(rc::Output_FLP1,  rc::OutputChannel_5),
-	rc::Channel(rc::Output_BRK1,  rc::OutputChannel_6),
-	rc::Channel(rc::Output_PIT,   rc::OutputChannel_7),
-        rc::Channel(rc::Output_GEAR,  rc::OutputChannel_8)
+	rc::Channel(rc::Output_PIT,   rc::OutputChannel_5),  // SW1
+	rc::Channel(rc::Output_FLP1,  rc::OutputChannel_6),  // SW2
+	rc::Channel(rc::Output_BRK1,  rc::OutputChannel_7),  // SW3
+        rc::Channel(rc::Output_GEAR,  rc::OutputChannel_8)   // PotiA6
 };
 
 // PPM related variables
@@ -125,9 +127,9 @@ rc::InputToOutputPipe g_aileron( rc::Input_AIL, rc::Output_AIL1);
 rc::InputToOutputPipe g_elevator(rc::Input_ELE, rc::Output_ELE1);
 rc::InputToOutputPipe g_throttle(rc::Input_THR, rc::Output_THR1);
 rc::InputToOutputPipe g_rudder(  rc::Input_RUD, rc::Output_RUD1);
-rc::InputToOutputPipe g_aux1(    rc::Input_FLP, rc::Output_FLP1);
-rc::InputToOutputPipe g_aux2(    rc::Input_BRK, rc::Output_BRK1);
-rc::InputToOutputPipe g_aux3(    rc::Input_PIT, rc::Output_PIT);
+rc::InputToOutputPipe g_aux1(    rc::Input_PIT, rc::Output_PIT);  // SW1
+rc::InputToOutputPipe g_aux2(    rc::Input_FLP, rc::Output_FLP1); // SW2
+rc::InputToOutputPipe g_aux3(    rc::Input_BRK, rc::Output_BRK1); // SW3
 // note: Channel 8 is not part of Input/Output-system
 
 
@@ -147,7 +149,7 @@ void setup()
         Serial.begin(9600);
         
          // read switch to determine the actual profile to be used
-  	rc::SwitchState tSwitchState = g_ch6In.read();
+  	rc::SwitchState tSwitchState = g_SW3.read();
         if      (tSwitchState == rc::SwitchState_Up)     g_ActiveProfile = 0;
         else if (tSwitchState == rc::SwitchState_Center) g_ActiveProfile = 1;
         else if (tSwitchState == rc::SwitchState_Down)   g_ActiveProfile = 2;
@@ -170,7 +172,7 @@ void setup()
 	rc::Timer2::init();
 	
          // read switch to enable/disable buzzer (silence mode)
-  	tSwitchState = g_ch7In.read();
+  	tSwitchState = g_SW1.read();
         if (tSwitchState == rc::SwitchState_Up)     
         {
           rc::g_Buzzer.setPin(TX_BUZZER_PIN);  // buzzer on -  NORMAL MODE
@@ -191,7 +193,7 @@ void setup()
             g_aPins[i].setReverse(cfg_AnalogSettings[i].Reverse);  
     	}
 	
-        g_PotiAIPin.setCalibration(0,512,1023);
+        g_PotiA6.setCalibration(0,512,1023);
         
 	// set up normalized -> microseconds conversion
 	rc::setCenter(1500); // servo center point
@@ -203,10 +205,10 @@ void setup()
 	rc::setOutputChannel(rc::OutputChannel_2, rc::normalizedToMicros(0));
 	rc::setOutputChannel(rc::OutputChannel_3, rc::normalizedToMicros(-256)); // Throttle channel, MUST BE AT 0 THROTTLE!
 	rc::setOutputChannel(rc::OutputChannel_4, rc::normalizedToMicros(0));
-	rc::setOutputChannel(rc::OutputChannel_5, rc::normalizedToMicros(0));
-	rc::setOutputChannel(rc::OutputChannel_6, rc::normalizedToMicros(0));
-	rc::setOutputChannel(rc::OutputChannel_7, rc::normalizedToMicros(0));
-	rc::setOutputChannel(rc::OutputChannel_8, rc::normalizedToMicros(0));
+	rc::setOutputChannel(rc::OutputChannel_5, rc::normalizedToMicros(0));  // SW1
+	rc::setOutputChannel(rc::OutputChannel_6, rc::normalizedToMicros(0));  // SW2
+	rc::setOutputChannel(rc::OutputChannel_7, rc::normalizedToMicros(0));  // SW3
+	rc::setOutputChannel(rc::OutputChannel_8, rc::normalizedToMicros(0));  // PotiA6
 
 	
 	// set up PPM
@@ -241,23 +243,20 @@ void loop()
           else if (g_Frsky.m_RSSI < cfg_RSSI[ORANGE]) rc::g_Buzzer.beep(20);
         }
 
+	g_SW1.read();
+	g_AnalogSW1.update();
 
-	g_ch5In.read();
-	g_ch5Switch.update();
+	g_SW2.read();
+	g_AnalogSW2.update();
 
-	rc::SwitchState fSwitchState = g_ch6In.read();
+	rc::SwitchState fSwitchState = g_SW3.read();
         int flightmode = 0;
         if      (fSwitchState == rc::SwitchState_Down)   flightmode = 0;
         else if (fSwitchState == rc::SwitchState_Center) flightmode = 1;
         else if (fSwitchState == rc::SwitchState_Up)     flightmode = 2;
-        
-
   
-	g_ch6In.read();
-	g_ch6Switch.update();
-                             
-	g_ch7In.read();
-	g_ch7Switch.update();
+//	g_SW3.read();
+	g_AnalogSW3.update();
 
 	
 	// read analog values, these write to the input system (AIL, ELE, THR and RUD)
@@ -298,9 +297,9 @@ void loop()
         g_elevator.apply();
 	g_rudder.apply();
 	g_throttle.apply();
-	g_aux1.apply();
-	g_aux2.apply();
-	g_aux3.apply();
+	g_aux1.apply();        // SW1
+	g_aux2.apply();        // SW2
+	g_aux3.apply();        // SW3
 	
 	// END OF OUTPUT HANDLING
 	// Now we've filled all the parts of the output system we need (AIL1, ELE1, THR1, RUD1, GYR1 and PIT1)
@@ -312,7 +311,8 @@ void loop()
 	for (uint8_t i = 0; i < ChannelCount; ++i) g_channels[i].apply();
 	
         // Channel 8 is handled outside the input output system, hence apply the values directly
-        g_channels[7].apply(g_PotiAIPin.read());
+        g_channels[7].apply(g_PotiA6.read());
+
 	// Tell PPMOut that new values are ready
 	g_PPMOut.update();
 }
