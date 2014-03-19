@@ -70,9 +70,9 @@ const t5x::AnalogSettings_t cfg_AnalogSettings[]=
 // in case switches should work in the opposite direction, you can simply configure that here. no need to open the case or resolder something...
 const t5x::SwitchSettings_t cfg_SwitchSettings[]=
 { 
-  {true},                          // SW1  Reverse
+  {false},                         // SW1  Reverse
   {false},                         // SW2  Reverse
-  {true}                           // SW3  Reverse
+  {false}                          // SW3  Reverse
 };
 
 

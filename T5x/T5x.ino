@@ -160,9 +160,9 @@ void setup()
 #else
   	rc::SwitchState tSwitchState = g_SW3.read();
 #endif
-        if      (tSwitchState == rc::SwitchState_Up)     g_ActiveProfile = 0;
+        if      (tSwitchState == rc::SwitchState_Down)   g_ActiveProfile = 0;
         else if (tSwitchState == rc::SwitchState_Center) g_ActiveProfile = 1;
-        else if (tSwitchState == rc::SwitchState_Down)   g_ActiveProfile = 2;
+        else if (tSwitchState == rc::SwitchState_Up)     g_ActiveProfile = 2;
   
         // initialize expo and dualrate objects with the profile specific values
         for (uint8_t i=0; i < 3; i++)
@@ -204,7 +204,7 @@ void setup()
     	}
 	
         g_PotiA6.setCalibration(cfg_AnalogSettings[6].Calibration[0], cfg_AnalogSettings[6].Calibration[1],  cfg_AnalogSettings[6].Calibration[2]);
-        
+        g_PotiA6.setReverse(cfg_AnalogSettings[6].Reverse);      
 	// set up normalized -> microseconds conversion
 	rc::setCenter(1500); // servo center point
 	rc::setTravel(700);  // max servo travel from center point
