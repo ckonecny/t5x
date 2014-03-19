@@ -26,4 +26,9 @@ typedef struct
   boolean Reverse;
 } AnalogSettings_t;
 
+typedef struct
+{
+  boolean Reverse;
+} SwitchSettings_t;
+
 } // namespace end

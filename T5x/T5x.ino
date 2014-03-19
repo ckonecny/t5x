@@ -148,6 +148,12 @@ void setup()
 {
         Serial.begin(9600);
         
+        // initialize switches working direction. maybe user wants to let them work in the other direction
+        g_SW1.setReverse(cfg_SwitchSettings[0].Reverse);
+        g_SW2.setReverse(cfg_SwitchSettings[1].Reverse);
+        g_SW3.setReverse(cfg_SwitchSettings[2].Reverse);
+        
+        
          // read switch to determine the actual profile to be used
 #ifdef T5X_SW2_SELECTS_PROFILE
   	rc::SwitchState tSwitchState = g_SW2.read();
@@ -197,7 +203,7 @@ void setup()
             g_aPins[i].setReverse(cfg_AnalogSettings[i].Reverse);  
     	}
 	
-        g_PotiA6.setCalibration(0,512,1023);
+        g_PotiA6.setCalibration(cfg_AnalogSettings[6].Calibration[0], cfg_AnalogSettings[6].Calibration[1],  cfg_AnalogSettings[6].Calibration[2]);
         
 	// set up normalized -> microseconds conversion
 	rc::setCenter(1500); // servo center point

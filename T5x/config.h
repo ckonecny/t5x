@@ -55,12 +55,26 @@ const int16_t   cfg_FlightTimeTrigger_ThrottleVal =        -200;   // Throttle V
 
 // use the AnalogReadSerial.ino sketch to determine the MIN, MID and MAX values for the main analog inputs
 const t5x::AnalogSettings_t cfg_AnalogSettings[]=
-{                                //    Calibration     ChannelReverse
-  {{93, 520, 965}, true},        //A0 {MIN, MID, MAX}, ChannelReverse 
-  {{35, 493, 937}, false},       //A1 {MIN, MID, MAX}, ChannelReverse 
-  {{26, 510, 920}, true},        //A2 {MIN, MID, MAX}, ChannelReverse 
-  {{83, 500, 950}, true}         //A3 {MIN, MID, MAX}, ChannelReverse 
+{                                   //    Calibration     ChannelReverse  Comment
+  {{93,   520,  965}, true},        //A0 {MIN, MID, MAX}, ChannelReverse  AIL
+  {{35,   493,  937}, false},       //A1 {MIN, MID, MAX}, ChannelReverse  ELE
+  {{26,   510,  920}, true},        //A2 {MIN, MID, MAX}, ChannelReverse  THR
+  {{83,   500,  950}, true},        //A3 {MIN, MID, MAX}, ChannelReverse  RUD
+  {{0 ,     0,    0}, true},        //A4 {MIN, MID, MAX}, ChannelReverse  reserved for I2C SDA, no need for calibration 
+  {{0 ,     0,    0}, true},        //A5 {MIN, MID, MAX}, ChannelReverse  reserved for I2C SCL, no need for calibration
+  {{0 ,   512, 1023}, true},        //A6 {MIN, MID, MAX}, ChannelReverse  Potentiometer
+  {{0 ,     0,   0 }, true}         //A7 {MIN, MID, MAX}, ChannelReverse  voltage sensor, no need for calibration  
 };
+
+
+// in case switches should work in the opposite direction, you can simply configure that here. no need to open the case or resolder something...
+const t5x::SwitchSettings_t cfg_SwitchSettings[]=
+{ 
+  {true},                          // SW1  Reverse
+  {false},                         // SW2  Reverse
+  {true}                           // SW3  Reverse
+};
+
 
 // choose one from the two 3-state switches SW2 or SW3 which one should be evaluated for selecting active profile
 //#define T5X_SW2_SELECTS_PROFILE        // SW2 selects the active profile during startup of the transmitter
