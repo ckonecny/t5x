@@ -35,6 +35,10 @@ namespace rc
 		Input_FLP, //!< Flap input
 		Input_BRK, //!< Airbrake input
 		Input_PIT, //!< Pitch input
+		Input_SW1, //!< added by kone
+		Input_SW2, //!< added by kone
+		Input_SW3, //!< added by kone
+		Input_POT1,//!< added by kone
 		
 		Input_Count,
 		Input_None //!< No input, special case

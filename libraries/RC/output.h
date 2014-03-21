@@ -53,6 +53,10 @@ namespace rc
 		Output_GEAR, //!< Landing gear output
 		Output_DOOR, //!< Landing gear doors output
 		Output_GOV,  //!< Governor speed output
+		Output_AUX1, //!< added by kone
+		Output_AUX2, //!< added by kone
+		Output_AUX3, //!< added by kone
+		Output_AUX4, //!< added by kone
 		
 		Output_Count,
 		Output_None //!< No output, special case

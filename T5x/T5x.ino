@@ -77,15 +77,15 @@ rc::AIPin g_aPins[4] =
 
 // ch 5
 rc::BiStateSwitch g_SW1(3, rc::Switch_A, false, false);
-rc::AnalogSwitch  g_AnalogSW1(rc::Switch_A, rc::Input_PIT);
+rc::AnalogSwitch  g_AnalogSW1(rc::Switch_A, rc::Input_SW1);
 
 // ch 6 + DR/Expo
 rc::TriStateSwitch g_SW2(4, 5, rc::Switch_B, true);
-rc::AnalogSwitch   g_AnalogSW2(rc::Switch_B, rc::Input_FLP);
+rc::AnalogSwitch   g_AnalogSW2(rc::Switch_B, rc::Input_SW2);
 
 // ch 7
 rc::TriStateSwitch g_SW3(6, 7, rc::Switch_C, true);
-rc::AnalogSwitch   g_AnalogSW3(rc::Switch_C, rc::Input_BRK);
+rc::AnalogSwitch   g_AnalogSW3(rc::Switch_C, rc::Input_SW3);
 
 
 ////////// Potentiometer ///////////////
@@ -113,10 +113,10 @@ rc::Channel g_channels[ChannelCount] =
 	rc::Channel(rc::Output_ELE1,  rc::OutputChannel_2),
 	rc::Channel(rc::Output_THR1,  rc::OutputChannel_3),
 	rc::Channel(rc::Output_RUD1,  rc::OutputChannel_4),
-	rc::Channel(rc::Output_PIT,   rc::OutputChannel_5),  // SW1
-	rc::Channel(rc::Output_FLP1,  rc::OutputChannel_6),  // SW2
-	rc::Channel(rc::Output_BRK1,  rc::OutputChannel_7),  // SW3
-        rc::Channel(rc::Output_GEAR,  rc::OutputChannel_8)   // PotiA6
+	rc::Channel(rc::Output_AUX1,  rc::OutputChannel_5),  // SW1
+	rc::Channel(rc::Output_AUX2,  rc::OutputChannel_6),  // SW2
+	rc::Channel(rc::Output_AUX3,  rc::OutputChannel_7),  // SW3
+        rc::Channel(rc::Output_AUX4,  rc::OutputChannel_8)   // PotiA6
 };
 
 // PPM related variables
@@ -127,10 +127,10 @@ rc::InputToOutputPipe g_aileron( rc::Input_AIL, rc::Output_AIL1);
 rc::InputToOutputPipe g_elevator(rc::Input_ELE, rc::Output_ELE1);
 rc::InputToOutputPipe g_throttle(rc::Input_THR, rc::Output_THR1);
 rc::InputToOutputPipe g_rudder(  rc::Input_RUD, rc::Output_RUD1);
-rc::InputToOutputPipe g_aux1(    rc::Input_PIT, rc::Output_PIT);  // SW1
-rc::InputToOutputPipe g_aux2(    rc::Input_FLP, rc::Output_FLP1); // SW2
-rc::InputToOutputPipe g_aux3(    rc::Input_BRK, rc::Output_BRK1); // SW3
-// note: Channel 8 is not part of Input/Output-system
+rc::InputToOutputPipe g_aux1(    rc::Input_SW1, rc::Output_AUX1); // SW1
+rc::InputToOutputPipe g_aux2(    rc::Input_SW2, rc::Output_AUX2); // SW2
+rc::InputToOutputPipe g_aux3(    rc::Input_SW3, rc::Output_AUX3); // SW3
+rc::InputToOutputPipe g_aux4(    rc::Input_POT1,rc::Output_AUX4); // Potentiometer
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -236,25 +236,7 @@ void setup()
 
 void loop()
 {
-        unsigned long now = millis();       
- 
-        g_Frsky.update();    // read telemetry data from serial link and update the values
-       
-        if ((now - last_telemetry >= cfg_Telemetry_Check_Interval)) {
-          last_telemetry = now;
-          float voltageTX = analogRead(T5X_TX_VOLT_PIN)*0.0146627565982405; // 0-15V in 1023 steps or 0,0146V per step
-          if (voltageTX < cfg_V_TX[RED]) rc::g_Buzzer.beep(10,10,2);
-          else if (voltageTX < cfg_V_TX[ORANGE]) rc::g_Buzzer.beep(20);
-
-          if (g_Frsky.m_A1_Voltage*0.0517647058823529 < cfg_Profile[g_ActiveProfile].V_A1[RED]) rc::g_Buzzer.beep(10,10,2);     //  0-13,2V in 255 steps or 0,052V per step
-          else if (g_Frsky.m_A1_Voltage*0.0517647058823529 < cfg_Profile[g_ActiveProfile].V_A1[ORANGE]) rc::g_Buzzer.beep(20);  //  0-13,2V in 255 steps or 0,052V per step
-
-          if (g_Frsky.m_RSSI < cfg_RSSI[RED]) rc::g_Buzzer.beep(10,10,2);
-          else if (g_Frsky.m_RSSI < cfg_RSSI[ORANGE]) rc::g_Buzzer.beep(20);
-        }
-
 	g_SW1.read();
-	g_AnalogSW1.update();
 
 #ifdef T5X_SW2_SELECTS_FLIGHTMODE
 	rc::SwitchState fSwitchState = g_SW2.read();
@@ -269,6 +251,7 @@ void loop()
         else if (fSwitchState == rc::SwitchState_Center) flightmode = 1;
         else if (fSwitchState == rc::SwitchState_Up)     flightmode = 2;
   
+	g_AnalogSW1.update();
 	g_AnalogSW2.update();
 	g_AnalogSW3.update();
 
@@ -278,6 +261,53 @@ void loop()
 	                       g_aPins[1].read(); // elevator
 	int16_t throttle_val = g_aPins[2].read(); // throttle 
 	                       g_aPins[3].read(); // rudder
+
+        g_PotiA6.read();
+
+        
+	// apply expo and dual rates to input, these read from and write to input system
+	g_ailExpo[flightmode].apply();
+	g_ailDR[flightmode].apply();
+	
+	g_eleExpo[flightmode].apply();
+	g_eleDR[flightmode].apply();
+	
+	g_rudExpo[flightmode].apply();
+	g_rudDR[flightmode].apply();
+
+        g_aileron.apply();
+        g_elevator.apply();
+	g_throttle.apply();
+	g_rudder.apply();
+	g_aux1.apply();        // SW1
+	g_aux2.apply();        // SW2
+	g_aux3.apply();        // SW3
+        g_aux4.apply();        // Poti
+	
+	// perform channel transformations and set channel values
+	for (uint8_t i = 0; i < ChannelCount; ++i) g_channels[i].apply();
+	
+	// Tell PPMOut that new values are ready
+	g_PPMOut.update();
+
+
+        g_Frsky.update();    // read telemetry data from serial link and update the values
+
+        unsigned long now = millis();       
+       
+        if ((now - last_telemetry >= cfg_Telemetry_Check_Interval)) {
+          last_telemetry = now;
+          float voltageTX = analogRead(T5X_TX_VOLT_PIN)*0.0146627565982405; // 0-15V in 1023 steps or 0,0146V per step
+          if (voltageTX < cfg_V_TX[RED]) rc::g_Buzzer.beep(10,10,2);
+          else if (voltageTX < cfg_V_TX[ORANGE]) rc::g_Buzzer.beep(20);
+
+          if (g_Frsky.m_A1_Voltage*0.0517647058823529 < cfg_Profile[g_ActiveProfile].V_A1[RED]) rc::g_Buzzer.beep(10,10,2);     //  0-13,2V in 255 steps or 0,052V per step
+          else if (g_Frsky.m_A1_Voltage*0.0517647058823529 < cfg_Profile[g_ActiveProfile].V_A1[ORANGE]) rc::g_Buzzer.beep(20);  //  0-13,2V in 255 steps or 0,052V per step
+
+          if (g_Frsky.m_RSSI < cfg_RSSI[RED]) rc::g_Buzzer.beep(10,10,2);
+          else if (g_Frsky.m_RSSI < cfg_RSSI[ORANGE]) rc::g_Buzzer.beep(20);
+        }
+
 
         if (now - last_flight_timer >= 1000)
         {
@@ -296,39 +326,7 @@ void loop()
             g_TimerSecAtPaused=g_Timer.getTime();
   	  }
         }
-        
-	// apply expo and dual rates to input, these read from and write to input system
-	g_ailExpo[flightmode].apply();
-	g_ailDR[flightmode].apply();
-	
-	g_eleExpo[flightmode].apply();
-	g_eleDR[flightmode].apply();
-	
-	g_rudExpo[flightmode].apply();
-	g_rudDR[flightmode].apply();
 
-        g_aileron.apply();
-        g_elevator.apply();
-	g_rudder.apply();
-	g_throttle.apply();
-	g_aux1.apply();        // SW1
-	g_aux2.apply();        // SW2
-	g_aux3.apply();        // SW3
-	
-	// END OF OUTPUT HANDLING
-	// Now we've filled all the parts of the output system we need (AIL1, ELE1, THR1, RUD1, GYR1 and PIT1)
-	// now we can start using the output to generate a signal or data packet
-	// Well, almost. Channel does perform some transformations, but these aren't written back into the output system
-	// since more than one channel may use the same output as source.
-	
-	// perform channel transformations and set channel values
-	for (uint8_t i = 0; i < ChannelCount; ++i) g_channels[i].apply();
-	
-        // Channel 8 is handled outside the input output system, hence apply the values directly
-        g_channels[7].apply(g_PotiA6.read());
-
-	// Tell PPMOut that new values are ready
-	g_PPMOut.update();
 }
 
 
