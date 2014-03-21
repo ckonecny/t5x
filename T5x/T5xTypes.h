@@ -17,6 +17,7 @@ typedef struct
     float         V_A1[2];    
     float         V_A2[2];
     uint16_t      Timer;
+    char          ChannelOrder[9];
 } Profile_t;
 
 

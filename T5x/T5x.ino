@@ -49,7 +49,7 @@
 #include "config.h"
 #include "Frsky.h"
 
-
+// warning levels for Telemetry Stuff
 #define ORANGE 0
 #define RED    1
 
@@ -57,70 +57,42 @@
 ///////////////////////////////////////////////////////////////////////
 // Transmitter Settings
 ///////////////////////////////////////////////////////////////////////
-
-enum
-{
-	ChannelCount = 8
-};
-
+enum {ChannelCount = 8};
 
 /////////// Analog Pins /////////////
 rc::AIPin g_aPins[4] = 
 {
-	rc::AIPin(A0, rc::Input_AIL), // we have to specify an input pint
+	rc::AIPin(A0, rc::Input_AIL), // we have to specify an input pin
 	rc::AIPin(A1, rc::Input_ELE), // and we can optionally specify an index in the centralized
 	rc::AIPin(A2, rc::Input_THR), // input buffer where results should be written to
 	rc::AIPin(A3, rc::Input_RUD)
 };
 
-////////// Switches ///////////////
+////////// Potentiometer ///////////////
+rc::AIPin g_Pot1(A6,rc::Input_POT1);  // Potentiometer on A6
 
-// ch 5
+
+///////////// Switches /////////////////
 rc::BiStateSwitch g_SW1(3, rc::Switch_A, false, false);
 rc::AnalogSwitch  g_AnalogSW1(rc::Switch_A, rc::Input_SW1);
 
-// ch 6 + DR/Expo
 rc::TriStateSwitch g_SW2(4, 5, rc::Switch_B, true);
 rc::AnalogSwitch   g_AnalogSW2(rc::Switch_B, rc::Input_SW2);
 
-// ch 7
 rc::TriStateSwitch g_SW3(6, 7, rc::Switch_C, true);
 rc::AnalogSwitch   g_AnalogSW3(rc::Switch_C, rc::Input_SW3);
 
 
-////////// Potentiometer ///////////////
-// ch 8
-rc::AIPin g_PotiA6(A6);            // Potentiometer on A6, no Input system assigned
-
-
-
-uint8_t      g_ActiveProfile=0;   // holds the active profile selected by the user via 3-pos switch g_SW2
-
-
+///////////// EXPO /////////////////
 rc::Expo g_ailExpo[3] = {rc::Expo(0, rc::Input_AIL), rc::Expo(0, rc::Input_AIL), rc::Expo(0, rc::Input_AIL)}; // also specify what index of the input
-rc::Expo g_eleExpo[3] = {rc::Expo(0, rc::Input_ELE), rc::Expo(0, rc::Input_ELE), rc::Expo(0, rc::Input_ELE)}; // buffer the expo should work on (optionally)
+rc::Expo g_eleExpo[3] = {rc::Expo(0, rc::Input_ELE), rc::Expo(0, rc::Input_ELE), rc::Expo(0, rc::Input_ELE)}; // buffer the expo should work on 
 rc::Expo g_rudExpo[3] = {rc::Expo(0, rc::Input_RUD), rc::Expo(0, rc::Input_RUD), rc::Expo(0, rc::Input_RUD)};
 
+/////////// Dual Rate //////////////
 rc::DualRates g_ailDR[3] = {rc::DualRates(100, rc::Input_AIL), rc::DualRates(100, rc::Input_AIL), rc::DualRates(100, rc::Input_AIL)}; // also specify what index of the input
 rc::DualRates g_eleDR[3] = {rc::DualRates(100, rc::Input_ELE), rc::DualRates(100, rc::Input_ELE), rc::DualRates(100, rc::Input_ELE)}; // buffer the dual rates
-rc::DualRates g_rudDR[3] = {rc::DualRates(100, rc::Input_RUD), rc::DualRates(100, rc::Input_RUD), rc::DualRates(100, rc::Input_RUD)}; // should work on (optionally)
+rc::DualRates g_rudDR[3] = {rc::DualRates(100, rc::Input_RUD), rc::DualRates(100, rc::Input_RUD), rc::DualRates(100, rc::Input_RUD)}; // should work on
 
-
-
-rc::Channel g_channels[ChannelCount] =
-{
-  	rc::Channel(rc::Output_AIL1,  rc::OutputChannel_1),
-	rc::Channel(rc::Output_ELE1,  rc::OutputChannel_2),
-	rc::Channel(rc::Output_THR1,  rc::OutputChannel_3),
-	rc::Channel(rc::Output_RUD1,  rc::OutputChannel_4),
-	rc::Channel(rc::Output_AUX1,  rc::OutputChannel_5),  // SW1
-	rc::Channel(rc::Output_AUX2,  rc::OutputChannel_6),  // SW2
-	rc::Channel(rc::Output_AUX3,  rc::OutputChannel_7),  // SW3
-        rc::Channel(rc::Output_AUX4,  rc::OutputChannel_8)   // PotiA6
-};
-
-// PPM related variables
-rc::PPMOut g_PPMOut(ChannelCount);
 
 // Set up pipes for direct input to output copying
 rc::InputToOutputPipe g_aileron( rc::Input_AIL, rc::Output_AIL1);
@@ -133,6 +105,24 @@ rc::InputToOutputPipe g_aux3(    rc::Input_SW3, rc::Output_AUX3); // SW3
 rc::InputToOutputPipe g_aux4(    rc::Input_POT1,rc::Output_AUX4); // Potentiometer
 
 
+////////// Channel Order ///////////
+rc::Channel g_channels[ChannelCount] =
+{
+  	rc::Channel(rc::Output_AIL1,  rc::OutputChannel_1),
+	rc::Channel(rc::Output_ELE1,  rc::OutputChannel_2),
+	rc::Channel(rc::Output_THR1,  rc::OutputChannel_3),
+	rc::Channel(rc::Output_RUD1,  rc::OutputChannel_4),
+	rc::Channel(rc::Output_AUX1,  rc::OutputChannel_5),  // SW1
+	rc::Channel(rc::Output_AUX2,  rc::OutputChannel_6),  // SW2
+	rc::Channel(rc::Output_AUX3,  rc::OutputChannel_7),  // SW3
+        rc::Channel(rc::Output_AUX4,  rc::OutputChannel_8)   // PotiA6
+};
+
+// define PPM for the given amount of channels 
+rc::PPMOut g_PPMOut(ChannelCount);
+
+
+
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
@@ -143,10 +133,12 @@ int16_t g_TimerSecAtPaused=0;
 unsigned long last_telemetry    = 0;
 unsigned long last_flight_timer = 0;
 
+uint8_t      g_ActiveProfile=0;   // holds the active profile selected by the user via 3-pos switch
+
 
 void setup()
 {
-        Serial.begin(9600);
+        Serial.begin(9600);    // telemetry
         
         // initialize switches working direction. maybe user wants to let them work in the other direction
         g_SW1.setReverse(cfg_SwitchSettings[0].Reverse);
@@ -170,9 +162,9 @@ void setup()
             g_ailExpo[i].set(cfg_Profile[g_ActiveProfile].AilExpo[i]);
             g_eleExpo[i].set(cfg_Profile[g_ActiveProfile].EleExpo[i]);
             g_rudExpo[i].set(cfg_Profile[g_ActiveProfile].RudExpo[i]);
-            g_ailDR[i].set(cfg_Profile[g_ActiveProfile].AilDR[i]);
-            g_eleDR[i].set(cfg_Profile[g_ActiveProfile].EleDR[i]);
-            g_rudDR[i].set(cfg_Profile[g_ActiveProfile].RudDR[i]);
+              g_ailDR[i].set(cfg_Profile[g_ActiveProfile].AilDR[i]  );
+              g_eleDR[i].set(cfg_Profile[g_ActiveProfile].EleDR[i]  );
+              g_rudDR[i].set(cfg_Profile[g_ActiveProfile].RudDR[i]  );
         }
   
   
@@ -186,9 +178,9 @@ void setup()
         if (tSwitchState == rc::SwitchState_Up)     
         {
           rc::g_Buzzer.setPin(T5X_TX_BUZZER_PIN);  // buzzer on -  NORMAL MODE
-          digitalWrite(T5X_TX_LED_PIN, HIGH);      // turns the LED on
+          digitalWrite(T5X_TX_LED_PIN, HIGH);      // turn the LED steady on
         } 
-        else rc::g_Buzzer.setPin(T5X_TX_LED_PIN);  // buzzer off - SILENCE MODE (use LED instead)
+        else rc::g_Buzzer.setPin(T5X_TX_LED_PIN);  // buzzer off - SILENCE MODE (use LED instead of buzzer)
 
         
         rc::g_Buzzer.beep(600, 0, 0);
@@ -196,16 +188,16 @@ void setup()
 
 
 	// set calibration values, these depend on hardware configurations
-        
-        for(int i=0; i<4; i++)
+        for(int i=0; i<4; i++)  // calibrate/reverse gimbals for AIL, ELE, THR, RUD
         {
             g_aPins[i].setCalibration(cfg_AnalogSettings[i].Calibration[0], cfg_AnalogSettings[i].Calibration[1],  cfg_AnalogSettings[i].Calibration[2]);
             g_aPins[i].setReverse(cfg_AnalogSettings[i].Reverse);  
     	}
 	
-        g_PotiA6.setCalibration(cfg_AnalogSettings[6].Calibration[0], cfg_AnalogSettings[6].Calibration[1],  cfg_AnalogSettings[6].Calibration[2]);
-        g_PotiA6.setReverse(cfg_AnalogSettings[6].Reverse);      
-	// set up normalized -> microseconds conversion
+        g_Pot1.setCalibration(cfg_AnalogSettings[6].Calibration[0], cfg_AnalogSettings[6].Calibration[1],  cfg_AnalogSettings[6].Calibration[2]);
+        g_Pot1.setReverse(cfg_AnalogSettings[6].Reverse);      
+	
+        // set up normalized -> microseconds conversion
 	rc::setCenter(1500); // servo center point
 	rc::setTravel(700);  // max servo travel from center point
 	// our output signal will lie between 920 and 2120 microseconds (1520 +/- 600)
@@ -251,29 +243,28 @@ void loop()
         else if (fSwitchState == rc::SwitchState_Center) flightmode = 1;
         else if (fSwitchState == rc::SwitchState_Up)     flightmode = 2;
   
-	g_AnalogSW1.update();
-	g_AnalogSW2.update();
-	g_AnalogSW3.update();
+	g_AnalogSW1.update();  // update the input system
+	g_AnalogSW2.update();  // update the input system
+	g_AnalogSW3.update();  // update the input system
 
 	
-	// read analog values, these write to the input system (AIL, ELE, THR and RUD)
+	// read analog values, these write to the input system (AIL, ELE, THR, RUD & POT1)
       	                       g_aPins[0].read(); // aileron
 	                       g_aPins[1].read(); // elevator
-	int16_t throttle_val = g_aPins[2].read(); // throttle 
+	int16_t throttle_val = g_aPins[2].read(); // throttle (we need the value to trigger the timer)
 	                       g_aPins[3].read(); // rudder
 
-        g_PotiA6.read();
+        g_Pot1.read();
 
         
 	// apply expo and dual rates to input, these read from and write to input system
 	g_ailExpo[flightmode].apply();
-	g_ailDR[flightmode].apply();
-	
 	g_eleExpo[flightmode].apply();
-	g_eleDR[flightmode].apply();
-	
 	g_rudExpo[flightmode].apply();
+
 	g_rudDR[flightmode].apply();
+	g_eleDR[flightmode].apply();
+	g_ailDR[flightmode].apply();
 
         g_aileron.apply();
         g_elevator.apply();
@@ -326,7 +317,6 @@ void loop()
             g_TimerSecAtPaused=g_Timer.getTime();
   	  }
         }
-
 }
 
 
