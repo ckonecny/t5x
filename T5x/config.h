@@ -16,7 +16,7 @@ const t5x::Profile_t cfg_Profile[] =
   {7.0, 6.6},     // TELEMETRY A1 VOLTAGE Warning Level ORANGE, RED
   {0,0},          // TELEMETRY A2 VOLTAGE Warning Level ORANGE, RED (Note: without divider 0-3,3V in 255 steps or 0,013V per step)  
   600,            // FLIGHT TIMER (seconds)
-  "AETR1234"      // Channel Order (prepared for later use)
+  "AETR1234"      // Channel Order AIL, ELE, TRH, RUD, AUX1 (SW1), AUX2 (SW2), AUX3 (SW3), AUX4 (POT1)
  },               ////////////////////////////////////////////////////////////////////////////////////////////////////////
  
  {                ///////////////////// PROFILE 2 ////////////////////////////////////////////////////////////////////////
@@ -31,7 +31,7 @@ const t5x::Profile_t cfg_Profile[] =
   {0.0, 0.0},     // TELEMETRY A1 VOLTAGE Warning Level ORANGE, RED
   {0.0 ,0.0},     // TELEMETRY A2 VOLTAGE Warning Level ORANGE, RED (Note: without divider 0-3,3V in 255 steps or 0,013V per step)  
   600,            // FLIGHT TIMER (seconds)
-  "AETR1234"      // Channel Order (prepared for later use)
+  "AETR1234"      // Channel Order AIL, ELE, TRH, RUD, AUX1 (SW1), AUX2 (SW2), AUX3 (SW3), AUX4 (POT1)
  },               ////////////////////////////////////////////////////////////////////////////////////////////////////////
  
  {                ///////////////////// PROFILE 3 ////////////////////////////////////////////////////////////////////////
@@ -46,7 +46,7 @@ const t5x::Profile_t cfg_Profile[] =
   {0.0, 0.0},     // TELEMETRY A1 VOLTAGE Warning Level ORANGE, RED
   {0.0 ,0.0},     // TELEMETRY A2 VOLTAGE Warning Level ORANGE, RED (Note: without divider 0-3,3V in 255 steps or 0,013V per step)  
   600,            // FLIGHT TIMER (seconds)
-  "AETR1234"      // Channel Order (prepared for later use)
+  "AETR1234"      // Channel Order AIL, ELE, TRH, RUD, AUX1 (SW1), AUX2 (SW2), AUX3 (SW3), AUX4 (POT1)
  }                ////////////////////////////////////////////////////////////////////////////////////////////////////////
 };
 
@@ -93,6 +93,8 @@ const t5x::SwitchSettings_t cfg_SwitchSettings[]=
 #define T5X_TX_BUZZER_PIN   8        // buzzer connected to digital pin 8
 #define T5X_TX_LED_PIN     13        // LED is on standard pin 13
 
+// enable the below to use pointer calculation instead of String.indexOf
+//#define T5X_USE_LESS_ROM_FOR_CHANNEL_ORDER_EVALUATION
 
 
 // check if preprocessor settings make sense, or generate error just in case of nonsense

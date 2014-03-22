@@ -108,14 +108,14 @@ rc::InputToOutputPipe g_aux4(    rc::Input_POT1,rc::Output_AUX4); // Potentiomet
 ////////// Channel Order ///////////
 rc::Channel g_channels[ChannelCount] =
 {
-  	rc::Channel(rc::Output_AIL1,  rc::OutputChannel_1),
-	rc::Channel(rc::Output_ELE1,  rc::OutputChannel_2),
-	rc::Channel(rc::Output_THR1,  rc::OutputChannel_3),
-	rc::Channel(rc::Output_RUD1,  rc::OutputChannel_4),
-	rc::Channel(rc::Output_AUX1,  rc::OutputChannel_5),  // SW1
-	rc::Channel(rc::Output_AUX2,  rc::OutputChannel_6),  // SW2
-	rc::Channel(rc::Output_AUX3,  rc::OutputChannel_7),  // SW3
-        rc::Channel(rc::Output_AUX4,  rc::OutputChannel_8)   // PotiA6
+  	rc::Channel(rc::Output_None,  rc::OutputChannel_1),
+	rc::Channel(rc::Output_None,  rc::OutputChannel_2),
+	rc::Channel(rc::Output_None,  rc::OutputChannel_3),
+	rc::Channel(rc::Output_None,  rc::OutputChannel_4),
+	rc::Channel(rc::Output_None,  rc::OutputChannel_5),  
+	rc::Channel(rc::Output_None,  rc::OutputChannel_6),  
+	rc::Channel(rc::Output_None,  rc::OutputChannel_7),  
+        rc::Channel(rc::Output_None,  rc::OutputChannel_8)   
 };
 
 // define PPM for the given amount of channels 
@@ -145,7 +145,7 @@ void setup()
         g_SW2.setReverse(cfg_SwitchSettings[1].Reverse);
         g_SW3.setReverse(cfg_SwitchSettings[2].Reverse);
         
-        
+         
          // read switch to determine the actual profile to be used
 #ifdef T5X_SW2_SELECTS_PROFILE
   	rc::SwitchState tSwitchState = g_SW2.read();
@@ -155,6 +155,29 @@ void setup()
         if      (tSwitchState == rc::SwitchState_Down)   g_ActiveProfile = 0;
         else if (tSwitchState == rc::SwitchState_Center) g_ActiveProfile = 1;
         else if (tSwitchState == rc::SwitchState_Up)     g_ActiveProfile = 2;
+ 
+        
+
+#ifdef T5X_USE_LESS_ROM_FOR_CHANNEL_ORDER_EVALUATION
+        g_channels[int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'A'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)].setSource(rc::Output_AIL1);
+        g_channels[int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'E'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)].setSource(rc::Output_ELE1);
+        g_channels[int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'T'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)].setSource(rc::Output_THR1);
+        g_channels[int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'R'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)].setSource(rc::Output_RUD1);
+        g_channels[int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'1'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)].setSource(rc::Output_AUX1);
+        g_channels[int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'2'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)].setSource(rc::Output_AUX2);
+        g_channels[int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'3'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)].setSource(rc::Output_AUX3);
+        g_channels[int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'4'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)].setSource(rc::Output_AUX4);
+#else
+        String tChannelOrder = String(cfg_Profile[g_ActiveProfile].ChannelOrder);
+        g_channels[tChannelOrder.indexOf('A')].setSource(rc::Output_AIL1);
+        g_channels[tChannelOrder.indexOf('E')].setSource(rc::Output_ELE1);
+        g_channels[tChannelOrder.indexOf('T')].setSource(rc::Output_THR1);
+        g_channels[tChannelOrder.indexOf('R')].setSource(rc::Output_RUD1);
+        g_channels[tChannelOrder.indexOf('1')].setSource(rc::Output_AUX1);
+        g_channels[tChannelOrder.indexOf('2')].setSource(rc::Output_AUX2);
+        g_channels[tChannelOrder.indexOf('3')].setSource(rc::Output_AUX3);
+        g_channels[tChannelOrder.indexOf('4')].setSource(rc::Output_AUX4);
+#endif
   
         // initialize expo and dualrate objects with the profile specific values
         for (uint8_t i=0; i < 3; i++)
