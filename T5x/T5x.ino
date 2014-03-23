@@ -146,18 +146,13 @@ void setup()
         g_SW3.setReverse(cfg_SwitchSettings[2].Reverse);
         
          
-         // read switch to determine the actual profile to be used
-#ifdef T5X_SW2_SELECTS_PROFILE
-  	rc::SwitchState tSwitchState = g_SW2.read();
+         // read both 3-pos switches for determining the actual profile to be used
+#ifdef T5X_PROFILE_SW2_PRIMARY
+  	g_ActiveProfile=(2-g_SW2.read())+((2-g_SW3.read())*3);
 #else
-  	rc::SwitchState tSwitchState = g_SW3.read();
+  	g_ActiveProfile=(2-g_SW3.read())+((2-g_SW2.read())*3);
 #endif
-        if      (tSwitchState == rc::SwitchState_Down)   g_ActiveProfile = 0;
-        else if (tSwitchState == rc::SwitchState_Center) g_ActiveProfile = 1;
-        else if (tSwitchState == rc::SwitchState_Up)     g_ActiveProfile = 2;
- 
-        
-
+        Serial.println(g_ActiveProfile);
 #ifdef T5X_USE_LESS_ROM_FOR_CHANNEL_ORDER_EVALUATION
         g_channels[int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'A'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)].setSource(rc::Output_AIL1);
         g_channels[int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'E'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)].setSource(rc::Output_ELE1);
@@ -166,7 +161,7 @@ void setup()
         g_channels[int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'1'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)].setSource(rc::Output_AUX1);
         g_channels[int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'2'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)].setSource(rc::Output_AUX2);
         g_channels[int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'3'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)].setSource(rc::Output_AUX3);
-        g_channels[int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'4'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)].setSource(rc::Output_AUX4);
+        g_channels[int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'P'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)].setSource(rc::Output_AUX4);
 #else
         String tChannelOrder = String(cfg_Profile[g_ActiveProfile].ChannelOrder);
         g_channels[tChannelOrder.indexOf('A')].setSource(rc::Output_AIL1);
@@ -176,7 +171,7 @@ void setup()
         g_channels[tChannelOrder.indexOf('1')].setSource(rc::Output_AUX1);
         g_channels[tChannelOrder.indexOf('2')].setSource(rc::Output_AUX2);
         g_channels[tChannelOrder.indexOf('3')].setSource(rc::Output_AUX3);
-        g_channels[tChannelOrder.indexOf('4')].setSource(rc::Output_AUX4);
+        g_channels[tChannelOrder.indexOf('P')].setSource(rc::Output_AUX4);
 #endif
   
         // initialize expo and dualrate objects with the profile specific values
@@ -197,7 +192,7 @@ void setup()
 	rc::Timer2::init();
 	
          // read switch to enable/disable buzzer (silence mode)
-  	tSwitchState = g_SW1.read();
+  	rc::SwitchState tSwitchState = g_SW1.read();
         if (tSwitchState == rc::SwitchState_Up)     
         {
           rc::g_Buzzer.setPin(T5X_TX_BUZZER_PIN);  // buzzer on -  NORMAL MODE
@@ -235,7 +230,7 @@ void setup()
 	rc::setOutputChannel(rc::OutputChannel(int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'1'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)), rc::normalizedToMicros(0));
 	rc::setOutputChannel(rc::OutputChannel(int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'2'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)), rc::normalizedToMicros(0));
 	rc::setOutputChannel(rc::OutputChannel(int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'3'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)), rc::normalizedToMicros(0));
-	rc::setOutputChannel(rc::OutputChannel(int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'4'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)), rc::normalizedToMicros(0));
+	rc::setOutputChannel(rc::OutputChannel(int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'P'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)), rc::normalizedToMicros(0));
 #else
 	rc::setOutputChannel(rc::OutputChannel(tChannelOrder.indexOf('A')), rc::normalizedToMicros(0));
 	rc::setOutputChannel(rc::OutputChannel(tChannelOrder.indexOf('E')), rc::normalizedToMicros(0));
@@ -244,7 +239,7 @@ void setup()
 	rc::setOutputChannel(rc::OutputChannel(tChannelOrder.indexOf('1')), rc::normalizedToMicros(0));
 	rc::setOutputChannel(rc::OutputChannel(tChannelOrder.indexOf('2')), rc::normalizedToMicros(0));
 	rc::setOutputChannel(rc::OutputChannel(tChannelOrder.indexOf('3')), rc::normalizedToMicros(0));
-	rc::setOutputChannel(rc::OutputChannel(tChannelOrder.indexOf('4')), rc::normalizedToMicros(0));
+	rc::setOutputChannel(rc::OutputChannel(tChannelOrder.indexOf('P')), rc::normalizedToMicros(0));
 #endif
 
 /*
