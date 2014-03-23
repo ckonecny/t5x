@@ -32,6 +32,7 @@ const t5x::Profile_t cfg_Profile[] =
   {0.0 ,0.0},     // TELEMETRY A2 VOLTAGE Warning Level ORANGE, RED (Note: without divider 0-3,3V in 255 steps or 0,013V per step)  
   600,            // FLIGHT TIMER (seconds)
   "AETR123P"      // Channel Order AIL, ELE, TRH, RUD, AUX1 (SW1), AUX2 (SW2), AUX3 (SW3), AUX4 (POT1)
+//  "AETR2MP-"    // VFM preparation: Channel Order AIL, ELE, TRH, RUD, SW2, MODE-SWITCH (SW1/SW3), POT1, NOTHING
  },               ////////////////////////////////////////////////////////////////////////////////////////////////////////
  
  {                ///////////////////// PROFILE 3 ////////////////////////////////////////////////////////////////////////
@@ -145,7 +146,7 @@ const float     cfg_V_TX[] =                       { 4*1.15,  4*1.1};   // TX Vo
 const uint8_t   cfg_RSSI[] =                       {40  , 30  };        // receiver signal strength indicator [0-127] Warning Level ORANGE, RED
 const uint16_t  cfg_Telemetry_Check_Interval =             8000;        // Tx Voltage, RSSI, A1 Voltage & A2 Voltage are to be checked every XXX ms. 
 const int16_t   cfg_FlightTimeTrigger_ThrottleVal =        -200;        // Throttle Value that triggers the Flight Timer
-
+const int16_t   cfg_VFMSteps[]={-256,-150,-50,50,150, 256};             // virtual flight mode switch steps
 
 // use the AnalogReadSerial.ino sketch to determine the MIN, MID and MAX values for the main analog inputs
 const t5x::AnalogSettings_t cfg_AnalogSettings[]=
@@ -183,9 +184,6 @@ const t5x::SwitchSettings_t cfg_SwitchSettings[]=
 #define T5X_TX_VOLT_PIN    A7        // voltage sensor on A7 
 #define T5X_TX_BUZZER_PIN   8        // buzzer connected to digital pin 8
 #define T5X_TX_LED_PIN     13        // LED is on standard pin 13
-
-// enable the below to use pointer calculation instead of String.indexOf
-#define T5X_USE_LESS_ROM_FOR_CHANNEL_ORDER_EVALUATION
 
 
 // check if preprocessor settings make sense, or generate error just in case of nonsense

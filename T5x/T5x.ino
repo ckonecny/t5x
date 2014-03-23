@@ -153,26 +153,15 @@ void setup()
   	g_ActiveProfile=(2-g_SW3.read())+((2-g_SW2.read())*3);
 #endif
 
-#ifdef T5X_USE_LESS_ROM_FOR_CHANNEL_ORDER_EVALUATION
-        g_channels[int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'A'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)].setSource(rc::Output_AIL1);
-        g_channels[int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'E'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)].setSource(rc::Output_ELE1);
-        g_channels[int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'T'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)].setSource(rc::Output_THR1);
-        g_channels[int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'R'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)].setSource(rc::Output_RUD1);
-        g_channels[int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'1'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)].setSource(rc::Output_AUX1);
-        g_channels[int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'2'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)].setSource(rc::Output_AUX2);
-        g_channels[int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'3'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)].setSource(rc::Output_AUX3);
-        g_channels[int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'P'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)].setSource(rc::Output_AUX4);
-#else
         String tChannelOrder = String(cfg_Profile[g_ActiveProfile].ChannelOrder);
-        g_channels[tChannelOrder.indexOf('A')].setSource(rc::Output_AIL1);
-        g_channels[tChannelOrder.indexOf('E')].setSource(rc::Output_ELE1);
-        g_channels[tChannelOrder.indexOf('T')].setSource(rc::Output_THR1);
-        g_channels[tChannelOrder.indexOf('R')].setSource(rc::Output_RUD1);
-        g_channels[tChannelOrder.indexOf('1')].setSource(rc::Output_AUX1);
-        g_channels[tChannelOrder.indexOf('2')].setSource(rc::Output_AUX2);
-        g_channels[tChannelOrder.indexOf('3')].setSource(rc::Output_AUX3);
-        g_channels[tChannelOrder.indexOf('P')].setSource(rc::Output_AUX4);
-#endif
+        int8_t j=tChannelOrder.indexOf('A'); if (j>-1) g_channels[j].setSource(rc::Output_AIL1);
+               j=tChannelOrder.indexOf('E'); if (j>-1) g_channels[j].setSource(rc::Output_ELE1);
+               j=tChannelOrder.indexOf('T'); if (j>-1) g_channels[j].setSource(rc::Output_THR1);
+               j=tChannelOrder.indexOf('R'); if (j>-1) g_channels[j].setSource(rc::Output_RUD1);
+               j=tChannelOrder.indexOf('1'); if (j>-1) g_channels[j].setSource(rc::Output_AUX1);
+               j=tChannelOrder.indexOf('2'); if (j>-1) g_channels[j].setSource(rc::Output_AUX2);
+               j=tChannelOrder.indexOf('3'); if (j>-1) g_channels[j].setSource(rc::Output_AUX3);
+               j=tChannelOrder.indexOf('P'); if (j>-1) g_channels[j].setSource(rc::Output_AUX4);
   
         // initialize expo and dualrate objects with the profile specific values
         for (uint8_t i=0; i < 3; i++)
@@ -222,37 +211,17 @@ void setup()
 	
 
 	// fill channel values buffer with sane values, all centered
-#ifdef T5X_USE_LESS_ROM_FOR_CHANNEL_ORDER_EVALUATION
-	rc::setOutputChannel(rc::OutputChannel(int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'A'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)), rc::normalizedToMicros(0));
-	rc::setOutputChannel(rc::OutputChannel(int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'E'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)), rc::normalizedToMicros(0));
-	rc::setOutputChannel(rc::OutputChannel(int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'T'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)), rc::normalizedToMicros(-256));
-	rc::setOutputChannel(rc::OutputChannel(int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'R'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)), rc::normalizedToMicros(0));
-	rc::setOutputChannel(rc::OutputChannel(int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'1'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)), rc::normalizedToMicros(0));
-	rc::setOutputChannel(rc::OutputChannel(int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'2'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)), rc::normalizedToMicros(0));
-	rc::setOutputChannel(rc::OutputChannel(int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'3'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)), rc::normalizedToMicros(0));
-	rc::setOutputChannel(rc::OutputChannel(int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'P'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)), rc::normalizedToMicros(0));
-#else
-	rc::setOutputChannel(rc::OutputChannel(tChannelOrder.indexOf('A')), rc::normalizedToMicros(0));
-	rc::setOutputChannel(rc::OutputChannel(tChannelOrder.indexOf('E')), rc::normalizedToMicros(0));
-	rc::setOutputChannel(rc::OutputChannel(tChannelOrder.indexOf('T')), rc::normalizedToMicros(-256));
-	rc::setOutputChannel(rc::OutputChannel(tChannelOrder.indexOf('R')), rc::normalizedToMicros(0));
-	rc::setOutputChannel(rc::OutputChannel(tChannelOrder.indexOf('1')), rc::normalizedToMicros(0));
-	rc::setOutputChannel(rc::OutputChannel(tChannelOrder.indexOf('2')), rc::normalizedToMicros(0));
-	rc::setOutputChannel(rc::OutputChannel(tChannelOrder.indexOf('3')), rc::normalizedToMicros(0));
-	rc::setOutputChannel(rc::OutputChannel(tChannelOrder.indexOf('P')), rc::normalizedToMicros(0));
-#endif
-
-/*
-	rc::setOutputChannel(rc::OutputChannel_1, rc::normalizedToMicros(0));
-	rc::setOutputChannel(rc::OutputChannel_2, rc::normalizedToMicros(0));
-	rc::setOutputChannel(rc::OutputChannel_3, rc::normalizedToMicros(-256)); // Throttle channel, MUST BE AT 0 THROTTLE!
-	rc::setOutputChannel(rc::OutputChannel_4, rc::normalizedToMicros(0));
-	rc::setOutputChannel(rc::OutputChannel_5, rc::normalizedToMicros(0));  // SW1
-	rc::setOutputChannel(rc::OutputChannel_6, rc::normalizedToMicros(0));  // SW2
-	rc::setOutputChannel(rc::OutputChannel_7, rc::normalizedToMicros(0));  // SW3
-	rc::setOutputChannel(rc::OutputChannel_8, rc::normalizedToMicros(0));  // PotiA6
-*/
-	
+        j=tChannelOrder.indexOf('A'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
+        j=tChannelOrder.indexOf('E'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
+        j=tChannelOrder.indexOf('T'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(-256));
+        j=tChannelOrder.indexOf('R'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
+        j=tChannelOrder.indexOf('1'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
+        j=tChannelOrder.indexOf('2'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
+        j=tChannelOrder.indexOf('3'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
+        j=tChannelOrder.indexOf('P'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
+        j=tChannelOrder.indexOf('M'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
+        j=tChannelOrder.indexOf('-'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));        
+         
 	// set up PPM
 	g_PPMOut.setPulseLength(400);   // default pulse length used by FrSky hardware
 	g_PPMOut.setPauseLength(20000); // default frame length used by FrSky hardware
@@ -268,7 +237,7 @@ void setup()
 
 void loop()
 {
-	g_SW1.read();
+	rc::SwitchState SW1State = g_SW1.read();
 
 #ifdef T5X_SW2_SELECTS_FLIGHTMODE
 	rc::SwitchState fSwitchState = g_SW2.read();
@@ -317,7 +286,15 @@ void loop()
 	
 	// perform channel transformations and set channel values
 	for (uint8_t i = 0; i < ChannelCount; ++i) g_channels[i].apply();
-	
+  
+        // the VFM Switch can have values from 0-5
+        // pick the value out of the 6 possibilities for cfg_VFMSteps depending on the virtual flight mode switch state
+        // and assign it to the corresponding channel if there is one in the active profile
+        int x=0;
+        if (SW1State==2) x=3;  // SW1 is BiState: 0,2. for calculating the virtual flight mode value we need value 0 or 3;	
+        int8_t j=String(cfg_Profile[g_ActiveProfile].ChannelOrder).indexOf('M'); if (j>-1) g_channels[j].apply(cfg_VFMSteps[2-fSwitchState+x]);
+        
+
 	// Tell PPMOut that new values are ready
 	g_PPMOut.update();
 
