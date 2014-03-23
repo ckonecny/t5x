@@ -225,7 +225,29 @@ void setup()
 	rc::setTravel(700);  // max servo travel from center point
 	// our output signal will lie between 920 and 2120 microseconds (1520 +/- 600)
 	
+
 	// fill channel values buffer with sane values, all centered
+#ifdef T5X_USE_LESS_ROM_FOR_CHANNEL_ORDER_EVALUATION
+	rc::setOutputChannel(rc::OutputChannel(int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'A'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)), rc::normalizedToMicros(0));
+	rc::setOutputChannel(rc::OutputChannel(int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'E'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)), rc::normalizedToMicros(0));
+	rc::setOutputChannel(rc::OutputChannel(int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'T'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)), rc::normalizedToMicros(-256));
+	rc::setOutputChannel(rc::OutputChannel(int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'R'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)), rc::normalizedToMicros(0));
+	rc::setOutputChannel(rc::OutputChannel(int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'1'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)), rc::normalizedToMicros(0));
+	rc::setOutputChannel(rc::OutputChannel(int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'2'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)), rc::normalizedToMicros(0));
+	rc::setOutputChannel(rc::OutputChannel(int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'3'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)), rc::normalizedToMicros(0));
+	rc::setOutputChannel(rc::OutputChannel(int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'4'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)), rc::normalizedToMicros(0));
+#else
+	rc::setOutputChannel(rc::OutputChannel(tChannelOrder.indexOf('A')), rc::normalizedToMicros(0));
+	rc::setOutputChannel(rc::OutputChannel(tChannelOrder.indexOf('E')), rc::normalizedToMicros(0));
+	rc::setOutputChannel(rc::OutputChannel(tChannelOrder.indexOf('T')), rc::normalizedToMicros(-256));
+	rc::setOutputChannel(rc::OutputChannel(tChannelOrder.indexOf('R')), rc::normalizedToMicros(0));
+	rc::setOutputChannel(rc::OutputChannel(tChannelOrder.indexOf('1')), rc::normalizedToMicros(0));
+	rc::setOutputChannel(rc::OutputChannel(tChannelOrder.indexOf('2')), rc::normalizedToMicros(0));
+	rc::setOutputChannel(rc::OutputChannel(tChannelOrder.indexOf('3')), rc::normalizedToMicros(0));
+	rc::setOutputChannel(rc::OutputChannel(tChannelOrder.indexOf('4')), rc::normalizedToMicros(0));
+#endif
+
+/*
 	rc::setOutputChannel(rc::OutputChannel_1, rc::normalizedToMicros(0));
 	rc::setOutputChannel(rc::OutputChannel_2, rc::normalizedToMicros(0));
 	rc::setOutputChannel(rc::OutputChannel_3, rc::normalizedToMicros(-256)); // Throttle channel, MUST BE AT 0 THROTTLE!
@@ -234,7 +256,7 @@ void setup()
 	rc::setOutputChannel(rc::OutputChannel_6, rc::normalizedToMicros(0));  // SW2
 	rc::setOutputChannel(rc::OutputChannel_7, rc::normalizedToMicros(0));  // SW3
 	rc::setOutputChannel(rc::OutputChannel_8, rc::normalizedToMicros(0));  // PotiA6
-
+*/
 	
 	// set up PPM
 	g_PPMOut.setPulseLength(400);   // default pulse length used by FrSky hardware
