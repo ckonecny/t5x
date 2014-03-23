@@ -152,7 +152,7 @@ void setup()
 #else
   	g_ActiveProfile=(2-g_SW3.read())+((2-g_SW2.read())*3);
 #endif
-        Serial.println(g_ActiveProfile);
+
 #ifdef T5X_USE_LESS_ROM_FOR_CHANNEL_ORDER_EVALUATION
         g_channels[int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'A'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)].setSource(rc::Output_AIL1);
         g_channels[int(strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'E'))-int(cfg_Profile[g_ActiveProfile].ChannelOrder)].setSource(rc::Output_ELE1);
