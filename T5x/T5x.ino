@@ -73,25 +73,25 @@ rc::AIPin g_Pot1(A6,rc::Input_POT1);  // Potentiometer on A6
 
 
 ///////////// Switches /////////////////
-rc::BiStateSwitch g_SW1(3, rc::Switch_A, false, false);
-rc::AnalogSwitch  g_AnalogSW1(rc::Switch_A, rc::Input_SW1);
+rc::BiStateSwitch  g_SW1(3,    rc::Switch_A);
+rc::AnalogSwitch   g_AnalogSW1(rc::Switch_A, rc::Input_SW1);
 
-rc::TriStateSwitch g_SW2(4, 5, rc::Switch_B, true);
+rc::TriStateSwitch g_SW2(4, 5, rc::Switch_B);
 rc::AnalogSwitch   g_AnalogSW2(rc::Switch_B, rc::Input_SW2);
 
-rc::TriStateSwitch g_SW3(6, 7, rc::Switch_C, true);
+rc::TriStateSwitch g_SW3(6, 7, rc::Switch_C);
 rc::AnalogSwitch   g_AnalogSW3(rc::Switch_C, rc::Input_SW3);
 
 
 ///////////// EXPO /////////////////
-rc::Expo g_ailExpo[3] = {rc::Expo(0, rc::Input_AIL), rc::Expo(0, rc::Input_AIL), rc::Expo(0, rc::Input_AIL)}; // also specify what index of the input
-rc::Expo g_eleExpo[3] = {rc::Expo(0, rc::Input_ELE), rc::Expo(0, rc::Input_ELE), rc::Expo(0, rc::Input_ELE)}; // buffer the expo should work on 
-rc::Expo g_rudExpo[3] = {rc::Expo(0, rc::Input_RUD), rc::Expo(0, rc::Input_RUD), rc::Expo(0, rc::Input_RUD)};
+rc::Expo g_ailExpo[6] = {rc::Expo(0, rc::Input_AIL), rc::Expo(0, rc::Input_AIL), rc::Expo(0, rc::Input_AIL), rc::Expo(0, rc::Input_AIL), rc::Expo(0, rc::Input_AIL), rc::Expo(0, rc::Input_AIL)}; // also specify what index of the input
+rc::Expo g_eleExpo[6] = {rc::Expo(0, rc::Input_ELE), rc::Expo(0, rc::Input_ELE), rc::Expo(0, rc::Input_ELE), rc::Expo(0, rc::Input_ELE), rc::Expo(0, rc::Input_ELE), rc::Expo(0, rc::Input_ELE)}; // buffer the expo should work on 
+rc::Expo g_rudExpo[6] = {rc::Expo(0, rc::Input_RUD), rc::Expo(0, rc::Input_RUD), rc::Expo(0, rc::Input_RUD), rc::Expo(0, rc::Input_RUD), rc::Expo(0, rc::Input_RUD), rc::Expo(0, rc::Input_RUD)};
 
 /////////// Dual Rate //////////////
-rc::DualRates g_ailDR[3] = {rc::DualRates(100, rc::Input_AIL), rc::DualRates(100, rc::Input_AIL), rc::DualRates(100, rc::Input_AIL)}; // also specify what index of the input
-rc::DualRates g_eleDR[3] = {rc::DualRates(100, rc::Input_ELE), rc::DualRates(100, rc::Input_ELE), rc::DualRates(100, rc::Input_ELE)}; // buffer the dual rates
-rc::DualRates g_rudDR[3] = {rc::DualRates(100, rc::Input_RUD), rc::DualRates(100, rc::Input_RUD), rc::DualRates(100, rc::Input_RUD)}; // should work on
+rc::DualRates g_ailDR[6] = {rc::DualRates(100, rc::Input_AIL), rc::DualRates(100, rc::Input_AIL), rc::DualRates(100, rc::Input_AIL), rc::DualRates(100, rc::Input_AIL), rc::DualRates(100, rc::Input_AIL), rc::DualRates(100, rc::Input_AIL)}; // also specify what index of the input
+rc::DualRates g_eleDR[6] = {rc::DualRates(100, rc::Input_ELE), rc::DualRates(100, rc::Input_ELE), rc::DualRates(100, rc::Input_ELE), rc::DualRates(100, rc::Input_ELE), rc::DualRates(100, rc::Input_ELE), rc::DualRates(100, rc::Input_ELE)}; // buffer the dual rates
+rc::DualRates g_rudDR[6] = {rc::DualRates(100, rc::Input_RUD), rc::DualRates(100, rc::Input_RUD), rc::DualRates(100, rc::Input_RUD), rc::DualRates(100, rc::Input_RUD), rc::DualRates(100, rc::Input_RUD), rc::DualRates(100, rc::Input_RUD)}; // should work on
 
 
 // Set up pipes for direct input to output copying
@@ -166,7 +166,7 @@ void setup()
                j=tChannelOrder.indexOf('P'); if (j>-1) g_channels[j].setSource(rc::Output_AUX4);
                
         // initialize expo and dualrate objects with the profile specific values
-        for (uint8_t i=0; i < 3; i++)
+        for (uint8_t i=0; i < 6; i++)
         {
             g_ailExpo[i].set(cfg_Profile[g_ActiveProfile].AilExpo[i]);
             g_eleExpo[i].set(cfg_Profile[g_ActiveProfile].EleExpo[i]);
@@ -250,9 +250,9 @@ void loop()
 #endif
 
         int flightmode = 0;
-        if      (fSwitchState == rc::SwitchState_Down)   flightmode = 0;
+        if      (fSwitchState == rc::SwitchState_Down  ) flightmode = 0;
         else if (fSwitchState == rc::SwitchState_Center) flightmode = 1;
-        else if (fSwitchState == rc::SwitchState_Up)     flightmode = 2;
+        else if (fSwitchState == rc::SwitchState_Up    ) flightmode = 2;
 
         if ((SW1State==rc::SwitchState_Up) && (strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'M')!=NULL)) flightmode=flightmode+3;  // virtual flightmode active? if so, evaluate switch 2 for that purpose
   
