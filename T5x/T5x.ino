@@ -130,6 +130,8 @@ t5x::Frsky g_Frsky;
 rc::FlightTimer g_Timer;
 int16_t g_TimerSecAtPaused=0;
 
+unsigned long now               = 0;
+unsigned long pmon_last         = 0; // only needed to verify loop time
 unsigned long last_telemetry    = 0;
 unsigned long last_flight_timer = 0;
 
@@ -162,7 +164,7 @@ void setup()
                j=tChannelOrder.indexOf('2'); if (j>-1) g_channels[j].setSource(rc::Output_AUX2);
                j=tChannelOrder.indexOf('3'); if (j>-1) g_channels[j].setSource(rc::Output_AUX3);
                j=tChannelOrder.indexOf('P'); if (j>-1) g_channels[j].setSource(rc::Output_AUX4);
-  
+               
         // initialize expo and dualrate objects with the profile specific values
         for (uint8_t i=0; i < 3; i++)
         {
@@ -251,6 +253,8 @@ void loop()
         if      (fSwitchState == rc::SwitchState_Down)   flightmode = 0;
         else if (fSwitchState == rc::SwitchState_Center) flightmode = 1;
         else if (fSwitchState == rc::SwitchState_Up)     flightmode = 2;
+
+        if ((SW1State==rc::SwitchState_Up) && (strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'M')!=NULL)) flightmode=flightmode+3;  // virtual flightmode active? if so, evaluate switch 2 for that purpose
   
 	g_AnalogSW1.update();  // update the input system
 	g_AnalogSW2.update();  // update the input system
@@ -283,17 +287,17 @@ void loop()
 	g_aux2.apply();        // SW2
 	g_aux3.apply();        // SW3
         g_aux4.apply();        // Poti
-	
+
 	// perform channel transformations and set channel values
-	for (uint8_t i = 0; i < ChannelCount; ++i) g_channels[i].apply();
-  
-        // the VFM Switch can have values from 0-5
-        // pick the value out of the 6 possibilities for cfg_VFMSteps depending on the virtual flight mode switch state
-        // and assign it to the corresponding channel if there is one in the active profile
-        int x=0;
-        if (SW1State==2) x=3;  // SW1 is BiState: 0,2. for calculating the virtual flight mode value we need value 0 or 3;	
-        int8_t j=String(cfg_Profile[g_ActiveProfile].ChannelOrder).indexOf('M'); if (j>-1) g_channels[j].apply(cfg_VFMSteps[2-fSwitchState+x]);
-        
+	for (uint8_t i = 0; i < ChannelCount; ++i)
+        {
+          switch (cfg_Profile[g_ActiveProfile].ChannelOrder[i])
+          {          
+            case '-':   g_channels[i].apply(0);                        break;   // ensure empty channel remains 0.
+            case 'M':   g_channels[i].apply(cfg_VFMSteps[flightmode]); break;   // apply virtual mode switch value according to flight mode 
+            default:    g_channels[i].apply();                                  // apply value from InputToOutputPipe
+          }
+        }
 
 	// Tell PPMOut that new values are ready
 	g_PPMOut.update();
@@ -301,8 +305,8 @@ void loop()
 
         g_Frsky.update();    // read telemetry data from serial link and update the values
 
-        unsigned long now = millis();       
-       
+        now = millis();  
+
         if ((now - last_telemetry >= cfg_Telemetry_Check_Interval)) {
           last_telemetry = now;
           float voltageTX = analogRead(T5X_TX_VOLT_PIN)*0.0146627565982405; // 0-15V in 1023 steps or 0,0146V per step
@@ -334,6 +338,9 @@ void loop()
             g_TimerSecAtPaused=g_Timer.getTime();
   	  }
         }
+
+//        Serial.println(now-pmon_last);      // for loop time measurment
+//        pmon_last=now;                      // to get a feeling of performance...
 }
 
 

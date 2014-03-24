@@ -4,151 +4,150 @@
 
 const t5x::Profile_t cfg_Profile[] =
 {
- {                ///////////////////// PROFILE 1 ////////////////////////////////////////////////////////////////////////
-  {0,0,0},        // AILERON EXPO [-100/+100]     Flight Mode 1 2 3 
-  {0,0,0},        // ELEVON  EXPO [-100/+100]     Flight Mode 1 2 3 
-  {0,0,0},        // RUDDER  EXPO [-100/+100]     Flight Mode 1 2 3 
+ { ///////////////////// PROFILE 1 ////////////////////////////////////////////////////////////////////////
+  {  0,  0,  0,  0,  0,  0},  // AILERON EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
+  {  0,  0,  0,  0,  0,  0},  // ELEVON  EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
+  {  0,  0,  0,  0,  0,  0},  // RUDDER  EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
 
-  {100,100,100},  // AILERON DUAL RATE [0/+140]   Flight Mode 1 2 3 
-  {100,100,100},  // ELEVON  DUAL RATE [0/+140]   Flight Mode 1 2 3 
-  {100,100,100},  // RUDDER  DUAL RATE [0/+140]   Flight Mode 1 2 3 
+  {100,100,100,100,100,100},  // AILERON DUAL RATE [0/+140]   Flight Mode 1 2 3 4 5 6
+  {100,100,100,100,100,100},  // ELEVON  DUAL RATE [0/+140]   Flight Mode 1 2 3 4 5 6
+  {100,100,100,100,100,100},  // RUDDER  DUAL RATE [0/+140]   Flight Mode 1 2 3 4 5 6
 
-  {2*3.5, 2*3.3}, // TELEMETRY A1 VOLTAGE Warning Level ORANGE, RED
-  {0,0},          // TELEMETRY A2 VOLTAGE Warning Level ORANGE, RED (Note: without divider 0-3,3V in 255 steps or 0,013V per step)  
-  600,            // FLIGHT TIMER (seconds)
-  "AETR123P"      // Channel Order AIL, ELE, TRH, RUD, AUX1 (SW1), AUX2 (SW2), AUX3 (SW3), AUX4 (POT1)
- },               ////////////////////////////////////////////////////////////////////////////////////////////////////////
+  {2*3.5, 2*3.3},             // TELEMETRY A1 VOLTAGE Warning Level ORANGE, RED
+  {0,0},                      // TELEMETRY A2 VOLTAGE Warning Level ORANGE, RED (Note: without divider 0-3,3V in 255 steps or 0,013V per step)  
+  600,                        // FLIGHT TIMER (seconds)
+  "AETR123P"                  // Channel Order AIL, ELE, TRH, RUD, AUX1 (SW1), AUX2 (SW2), AUX3 (SW3), AUX4 (POT1)
+ }, ////////////////////////////////////////////////////////////////////////////////////////////////////////
  
- {                ///////////////////// PROFILE 2 ////////////////////////////////////////////////////////////////////////
-  {0,0,0},        // AILERON EXPO [-100/+100]     Flight Mode 1 2 3 
-  {0,0,0},        // ELEVON  EXPO [-100/+100]     Flight Mode 1 2 3 
-  {0,0,0},        // RUDDER  EXPO [-100/+100]     Flight Mode 1 2 3 
+ {  ///////////////////// PROFILE 2 ////////////////////////////////////////////////////////////////////////
+  {  0,  0,  0,  0,  0,  0},  // AILERON EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
+  {  0,  0,  0,  0,  0,  0},  // ELEVON  EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
+  {  0,  0,  0,  0,  0,  0},  // RUDDER  EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
 
-  {100,100,100},  // AILERON DUAL RATE [0/+140]   Flight Mode 1 2 3 
-  {100,100,100},  // ELEVON  DUAL RATE [0/+140]   Flight Mode 1 2 3 
-  {100,100,100},  // RUDDER  DUAL RATE [0/+140]   Flight Mode 1 2 3 
+  {100,100,100,100,100,100},  // AILERON DUAL RATE [0/+140]   Flight Mode 1 2 3 4 5 6
+  {100,100,100,100,100,100},  // ELEVON  DUAL RATE [0/+140]   Flight Mode 1 2 3 4 5 6
+  {100,100,100,100,100,100},  // RUDDER  DUAL RATE [0/+140]   Flight Mode 1 2 3 4 5 6
 
-  {0.0, 0.0},     // TELEMETRY A1 VOLTAGE Warning Level ORANGE, RED
-  {0.0 ,0.0},     // TELEMETRY A2 VOLTAGE Warning Level ORANGE, RED (Note: without divider 0-3,3V in 255 steps or 0,013V per step)  
-  600,            // FLIGHT TIMER (seconds)
-  "AETR123P"      // Channel Order AIL, ELE, TRH, RUD, AUX1 (SW1), AUX2 (SW2), AUX3 (SW3), AUX4 (POT1)
-//  "AETR2MP-"    // VFM preparation: Channel Order AIL, ELE, TRH, RUD, SW2, MODE-SWITCH (SW1/SW3), POT1, NOTHING
- },               ////////////////////////////////////////////////////////////////////////////////////////////////////////
+  {0.0, 0.0},                 // TELEMETRY A1 VOLTAGE Warning Level ORANGE, RED
+  {0,0},                      // TELEMETRY A2 VOLTAGE Warning Level ORANGE, RED (Note: without divider 0-3,3V in 255 steps or 0,013V per step)  
+  600,                        // FLIGHT TIMER (seconds)
+  "AETRMP2-"                  // VFM: Channel Order AIL, ELE, TRH, RUD, VIRTUAL MODE SWITCH (SW1/SW3), POT1, SW2, NOTHING
+ },  ////////////////////////////////////////////////////////////////////////////////////////////////////////
  
- {                ///////////////////// PROFILE 3 ////////////////////////////////////////////////////////////////////////
-  {0, 30, 50},    // AILERON EXPO [-100/+100]     Flight Mode 1 2 3 
-  {0, 30, 50},    // ELEVON  EXPO [-100/+100]     Flight Mode 1 2 3 
-  {0, 50, 70},    // RUDDER  EXPO [-100/+100]     Flight Mode 1 2 3 
+ {  ///////////////////// PROFILE 3 ////////////////////////////////////////////////////////////////////////
+  {  0, 30, 50,  0,  0,  0},  // AILERON EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
+  {  0, 30, 50,  0,  0,  0},  // ELEVON  EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
+  {  0, 30, 50,  0,  0,  0},  // RUDDER  EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
 
-  {100,100,100},  // AILERON DUAL RATE [0/+140]   Flight Mode 1 2 3 
-  {100,100,100},  // ELEVON  DUAL RATE [0/+140]   Flight Mode 1 2 3 
-  {100,100,100},  // RUDDER  DUAL RATE [0/+140]   Flight Mode 1 2 3 
+  {100,100,100,100,100,100},  // AILERON DUAL RATE [0/+140]   Flight Mode 1 2 3 4 5 6
+  {100,100,100,100,100,100},  // ELEVON  DUAL RATE [0/+140]   Flight Mode 1 2 3 4 5 6
+  {100,100,100,100,100,100},  // RUDDER  DUAL RATE [0/+140]   Flight Mode 1 2 3 4 5 6
 
-  {0.0, 0.0},     // TELEMETRY A1 VOLTAGE Warning Level ORANGE, RED
-  {0.0 ,0.0},     // TELEMETRY A2 VOLTAGE Warning Level ORANGE, RED (Note: without divider 0-3,3V in 255 steps or 0,013V per step)  
-  600,            // FLIGHT TIMER (seconds)
-  "AETR123P"      // Channel Order AIL, ELE, TRH, RUD, AUX1 (SW1), AUX2 (SW2), AUX3 (SW3), AUX4 (POT1)
- },               ////////////////////////////////////////////////////////////////////////////////////////////////////////
+  {0.0, 0.0},                 // TELEMETRY A1 VOLTAGE Warning Level ORANGE, RED
+  {0.0 ,0.0},                 // TELEMETRY A2 VOLTAGE Warning Level ORANGE, RED (Note: without divider 0-3,3V in 255 steps or 0,013V per step)  
+  600,                        // FLIGHT TIMER (seconds)
+  "AETR123P"                  // Channel Order AIL, ELE, TRH, RUD, AUX1 (SW1), AUX2 (SW2), AUX3 (SW3), AUX4 (POT1)
+ }, ////////////////////////////////////////////////////////////////////////////////////////////////////////
  
- {                ///////////////////// PROFILE 4 ////////////////////////////////////////////////////////////////////////
-  {0,0,0},        // AILERON EXPO [-100/+100]     Flight Mode 1 2 3 
-  {0,0,0},        // ELEVON  EXPO [-100/+100]     Flight Mode 1 2 3 
-  {0,0,0},        // RUDDER  EXPO [-100/+100]     Flight Mode 1 2 3 
+ {  ///////////////////// PROFILE 4 ////////////////////////////////////////////////////////////////////////
+  {  0,  0,  0,  0,  0,  0},  // AILERON EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
+  {  0,  0,  0,  0,  0,  0},  // ELEVON  EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
+  {  0,  0,  0,  0,  0,  0},  // RUDDER  EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
 
-  {100,100,100},  // AILERON DUAL RATE [0/+140]   Flight Mode 1 2 3 
-  {100,100,100},  // ELEVON  DUAL RATE [0/+140]   Flight Mode 1 2 3 
-  {100,100,100},  // RUDDER  DUAL RATE [0/+140]   Flight Mode 1 2 3 
+  {100,100,100,100,100,100},  // AILERON DUAL RATE [0/+140]   Flight Mode 1 2 3 4 5 6
+  {100,100,100,100,100,100},  // ELEVON  DUAL RATE [0/+140]   Flight Mode 1 2 3 4 5 6
+  {100,100,100,100,100,100},  // RUDDER  DUAL RATE [0/+140]   Flight Mode 1 2 3 4 5 6
 
-  {0.0, 0.0},     // TELEMETRY A1 VOLTAGE Warning Level ORANGE, RED
-  {0.0 ,0.0},     // TELEMETRY A2 VOLTAGE Warning Level ORANGE, RED (Note: without divider 0-3,3V in 255 steps or 0,013V per step)  
-  600,            // FLIGHT TIMER (seconds)
-  "AETR123P"      // Channel Order AIL, ELE, TRH, RUD, AUX1 (SW1), AUX2 (SW2), AUX3 (SW3), AUX4 (POT1)
- },               ////////////////////////////////////////////////////////////////////////////////////////////////////////
+  {2*3.5, 2*3.3},             // TELEMETRY A1 VOLTAGE Warning Level ORANGE, RED
+  {0,0},                      // TELEMETRY A2 VOLTAGE Warning Level ORANGE, RED (Note: without divider 0-3,3V in 255 steps or 0,013V per step)  
+  600,                        // FLIGHT TIMER (seconds)
+  "AETR123P"                  // Channel Order AIL, ELE, TRH, RUD, AUX1 (SW1), AUX2 (SW2), AUX3 (SW3), AUX4 (POT1)
+ }, ////////////////////////////////////////////////////////////////////////////////////////////////////////
   
- {                ///////////////////// PROFILE 5 ////////////////////////////////////////////////////////////////////////
-  {0,0,0},        // AILERON EXPO [-100/+100]     Flight Mode 1 2 3 
-  {0,0,0},        // ELEVON  EXPO [-100/+100]     Flight Mode 1 2 3 
-  {0,0,0},        // RUDDER  EXPO [-100/+100]     Flight Mode 1 2 3 
+ {  ///////////////////// PROFILE 5 ////////////////////////////////////////////////////////////////////////
+  {  0,  0,  0,  0,  0,  0},  // AILERON EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
+  {  0,  0,  0,  0,  0,  0},  // ELEVON  EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
+  {  0,  0,  0,  0,  0,  0},  // RUDDER  EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
 
-  {100,100,100},  // AILERON DUAL RATE [0/+140]   Flight Mode 1 2 3 
-  {100,100,100},  // ELEVON  DUAL RATE [0/+140]   Flight Mode 1 2 3 
-  {100,100,100},  // RUDDER  DUAL RATE [0/+140]   Flight Mode 1 2 3 
+  {100,100,100,100,100,100},  // AILERON DUAL RATE [0/+140]   Flight Mode 1 2 3 4 5 6
+  {100,100,100,100,100,100},  // ELEVON  DUAL RATE [0/+140]   Flight Mode 1 2 3 4 5 6
+  {100,100,100,100,100,100},  // RUDDER  DUAL RATE [0/+140]   Flight Mode 1 2 3 4 5 6
 
-  {0.0, 0.0},     // TELEMETRY A1 VOLTAGE Warning Level ORANGE, RED
-  {0.0 ,0.0},     // TELEMETRY A2 VOLTAGE Warning Level ORANGE, RED (Note: without divider 0-3,3V in 255 steps or 0,013V per step)  
-  600,            // FLIGHT TIMER (seconds)
-  "AETR123P"      // Channel Order AIL, ELE, TRH, RUD, AUX1 (SW1), AUX2 (SW2), AUX3 (SW3), AUX4 (POT1)
- },               ////////////////////////////////////////////////////////////////////////////////////////////////////////
+  {2*3.5, 2*3.3},             // TELEMETRY A1 VOLTAGE Warning Level ORANGE, RED
+  {0,0},                      // TELEMETRY A2 VOLTAGE Warning Level ORANGE, RED (Note: without divider 0-3,3V in 255 steps or 0,013V per step)  
+  600,                        // FLIGHT TIMER (seconds)
+  "AETR123P"                  // Channel Order AIL, ELE, TRH, RUD, AUX1 (SW1), AUX2 (SW2), AUX3 (SW3), AUX4 (POT1)
+ }, ////////////////////////////////////////////////////////////////////////////////////////////////////////
   
- {                ///////////////////// PROFILE 6 ////////////////////////////////////////////////////////////////////////
-  {0,0,0},        // AILERON EXPO [-100/+100]     Flight Mode 1 2 3 
-  {0,0,0},        // ELEVON  EXPO [-100/+100]     Flight Mode 1 2 3 
-  {0,0,0},        // RUDDER  EXPO [-100/+100]     Flight Mode 1 2 3 
+ {  ///////////////////// PROFILE 6 ////////////////////////////////////////////////////////////////////////
+  {  0,  0,  0,  0,  0,  0},  // AILERON EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
+  {  0,  0,  0,  0,  0,  0},  // ELEVON  EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
+  {  0,  0,  0,  0,  0,  0},  // RUDDER  EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
 
-  {100,100,100},  // AILERON DUAL RATE [0/+140]   Flight Mode 1 2 3 
-  {100,100,100},  // ELEVON  DUAL RATE [0/+140]   Flight Mode 1 2 3 
-  {100,100,100},  // RUDDER  DUAL RATE [0/+140]   Flight Mode 1 2 3 
+  {100,100,100,100,100,100},  // AILERON DUAL RATE [0/+140]   Flight Mode 1 2 3 4 5 6
+  {100,100,100,100,100,100},  // ELEVON  DUAL RATE [0/+140]   Flight Mode 1 2 3 4 5 6
+  {100,100,100,100,100,100},  // RUDDER  DUAL RATE [0/+140]   Flight Mode 1 2 3 4 5 6
 
-  {0.0, 0.0},     // TELEMETRY A1 VOLTAGE Warning Level ORANGE, RED
-  {0.0 ,0.0},     // TELEMETRY A2 VOLTAGE Warning Level ORANGE, RED (Note: without divider 0-3,3V in 255 steps or 0,013V per step)  
-  600,            // FLIGHT TIMER (seconds)
-  "AETR123P"      // Channel Order AIL, ELE, TRH, RUD, AUX1 (SW1), AUX2 (SW2), AUX3 (SW3), AUX4 (POT1)
- },               ////////////////////////////////////////////////////////////////////////////////////////////////////////
+  {2*3.5, 2*3.3},             // TELEMETRY A1 VOLTAGE Warning Level ORANGE, RED
+  {0,0},                      // TELEMETRY A2 VOLTAGE Warning Level ORANGE, RED (Note: without divider 0-3,3V in 255 steps or 0,013V per step)  
+  600,                        // FLIGHT TIMER (seconds)
+  "AETR123P"                  // Channel Order AIL, ELE, TRH, RUD, AUX1 (SW1), AUX2 (SW2), AUX3 (SW3), AUX4 (POT1)
+ }, ////////////////////////////////////////////////////////////////////////////////////////////////////////
  
   
- {                ///////////////////// PROFILE 7 ////////////////////////////////////////////////////////////////////////
-  {0,0,0},        // AILERON EXPO [-100/+100]     Flight Mode 1 2 3 
-  {0,0,0},        // ELEVON  EXPO [-100/+100]     Flight Mode 1 2 3 
-  {0,0,0},        // RUDDER  EXPO [-100/+100]     Flight Mode 1 2 3 
+ {  ///////////////////// PROFILE 7 ////////////////////////////////////////////////////////////////////////
+  {  0,  0,  0,  0,  0,  0},  // AILERON EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
+  {  0,  0,  0,  0,  0,  0},  // ELEVON  EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
+  {  0,  0,  0,  0,  0,  0},  // RUDDER  EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
 
-  {100,100,100},  // AILERON DUAL RATE [0/+140]   Flight Mode 1 2 3 
-  {100,100,100},  // ELEVON  DUAL RATE [0/+140]   Flight Mode 1 2 3 
-  {100,100,100},  // RUDDER  DUAL RATE [0/+140]   Flight Mode 1 2 3 
+  {100,100,100,100,100,100},  // AILERON DUAL RATE [0/+140]   Flight Mode 1 2 3 4 5 6
+  {100,100,100,100,100,100},  // ELEVON  DUAL RATE [0/+140]   Flight Mode 1 2 3 4 5 6
+  {100,100,100,100,100,100},  // RUDDER  DUAL RATE [0/+140]   Flight Mode 1 2 3 4 5 6
 
-  {0.0, 0.0},     // TELEMETRY A1 VOLTAGE Warning Level ORANGE, RED
-  {0.0 ,0.0},     // TELEMETRY A2 VOLTAGE Warning Level ORANGE, RED (Note: without divider 0-3,3V in 255 steps or 0,013V per step)  
-  600,            // FLIGHT TIMER (seconds)
-  "AETR123P"      // Channel Order AIL, ELE, TRH, RUD, AUX1 (SW1), AUX2 (SW2), AUX3 (SW3), POT1
- },               ////////////////////////////////////////////////////////////////////////////////////////////////////////
+  {2*3.5, 2*3.3},             // TELEMETRY A1 VOLTAGE Warning Level ORANGE, RED
+  {0,0},                      // TELEMETRY A2 VOLTAGE Warning Level ORANGE, RED (Note: without divider 0-3,3V in 255 steps or 0,013V per step)  
+  600,                        // FLIGHT TIMER (seconds)
+  "AETR123P"                  // Channel Order AIL, ELE, TRH, RUD, AUX1 (SW1), AUX2 (SW2), AUX3 (SW3), AUX4 (POT1)
+ }, ////////////////////////////////////////////////////////////////////////////////////////////////////////
   
- {                ///////////////////// PROFILE 8 ////////////////////////////////////////////////////////////////////////
-  {0,0,0},        // AILERON EXPO [-100/+100]     Flight Mode 1 2 3 
-  {0,0,0},        // ELEVON  EXPO [-100/+100]     Flight Mode 1 2 3 
-  {0,0,0},        // RUDDER  EXPO [-100/+100]     Flight Mode 1 2 3 
+ {  ///////////////////// PROFILE 8 ////////////////////////////////////////////////////////////////////////
+  {  0,  0,  0,  0,  0,  0},  // AILERON EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
+  {  0,  0,  0,  0,  0,  0},  // ELEVON  EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
+  {  0,  0,  0,  0,  0,  0},  // RUDDER  EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
 
-  {100,100,100},  // AILERON DUAL RATE [0/+140]   Flight Mode 1 2 3 
-  {100,100,100},  // ELEVON  DUAL RATE [0/+140]   Flight Mode 1 2 3 
-  {100,100,100},  // RUDDER  DUAL RATE [0/+140]   Flight Mode 1 2 3 
+  {100,100,100,100,100,100},  // AILERON DUAL RATE [0/+140]   Flight Mode 1 2 3 4 5 6
+  {100,100,100,100,100,100},  // ELEVON  DUAL RATE [0/+140]   Flight Mode 1 2 3 4 5 6
+  {100,100,100,100,100,100},  // RUDDER  DUAL RATE [0/+140]   Flight Mode 1 2 3 4 5 6
 
-  {0.0, 0.0},     // TELEMETRY A1 VOLTAGE Warning Level ORANGE, RED
-  {0.0 ,0.0},     // TELEMETRY A2 VOLTAGE Warning Level ORANGE, RED (Note: without divider 0-3,3V in 255 steps or 0,013V per step)  
-  600,            // FLIGHT TIMER (seconds)
-  "AETR123P"      // Channel Order AIL, ELE, TRH, RUD, AUX1 (SW1), AUX2 (SW2), AUX3 (SW3), POT1
- },               ////////////////////////////////////////////////////////////////////////////////////////////////////////
+  {2*3.5, 2*3.3},             // TELEMETRY A1 VOLTAGE Warning Level ORANGE, RED
+  {0,0},                      // TELEMETRY A2 VOLTAGE Warning Level ORANGE, RED (Note: without divider 0-3,3V in 255 steps or 0,013V per step)  
+  600,                        // FLIGHT TIMER (seconds)
+  "AETR123P"                  // Channel Order AIL, ELE, TRH, RUD, AUX1 (SW1), AUX2 (SW2), AUX3 (SW3), AUX4 (POT1)
+ }, ////////////////////////////////////////////////////////////////////////////////////////////////////////
   
- {                ///////////////////// PROFILE 9 ////////////////////////////////////////////////////////////////////////
-  {0,0,0},        // AILERON EXPO [-100/+100]     Flight Mode 1 2 3 
-  {0,0,0},        // ELEVON  EXPO [-100/+100]     Flight Mode 1 2 3 
-  {0,0,0},        // RUDDER  EXPO [-100/+100]     Flight Mode 1 2 3 
+ {  ///////////////////// PROFILE 9 ////////////////////////////////////////////////////////////////////////
+  {  0,  0,  0,  0,  0,  0},  // AILERON EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
+  {  0,  0,  0,  0,  0,  0},  // ELEVON  EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
+  {  0,  0,  0,  0,  0,  0},  // RUDDER  EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
 
-  {100,100,100},  // AILERON DUAL RATE [0/+140]   Flight Mode 1 2 3 
-  {100,100,100},  // ELEVON  DUAL RATE [0/+140]   Flight Mode 1 2 3 
-  {100,100,100},  // RUDDER  DUAL RATE [0/+140]   Flight Mode 1 2 3 
+  {100,100,100,100,100,100},  // AILERON DUAL RATE [0/+140]   Flight Mode 1 2 3 4 5 6
+  {100,100,100,100,100,100},  // ELEVON  DUAL RATE [0/+140]   Flight Mode 1 2 3 4 5 6
+  {100,100,100,100,100,100},  // RUDDER  DUAL RATE [0/+140]   Flight Mode 1 2 3 4 5 6
 
-  {0.0, 0.0},     // TELEMETRY A1 VOLTAGE Warning Level ORANGE, RED
-  {0.0 ,0.0},     // TELEMETRY A2 VOLTAGE Warning Level ORANGE, RED (Note: without divider 0-3,3V in 255 steps or 0,013V per step)  
-  600,            // FLIGHT TIMER (seconds)
-  "AETR123P"      // Channel Order AIL, ELE, TRH, RUD, AUX1 (SW1), AUX2 (SW2), AUX3 (SW3), POT1
- }                ////////////////////////////////////////////////////////////////////////////////////////////////////////
+  {2*3.5, 2*3.3},             // TELEMETRY A1 VOLTAGE Warning Level ORANGE, RED
+  {0,0},                      // TELEMETRY A2 VOLTAGE Warning Level ORANGE, RED (Note: without divider 0-3,3V in 255 steps or 0,013V per step)  
+  600,                        // FLIGHT TIMER (seconds)
+  "AETR123P"                  // Channel Order AIL, ELE, TRH, RUD, AUX1 (SW1), AUX2 (SW2), AUX3 (SW3), AUX4 (POT1)
+ }  ////////////////////////////////////////////////////////////////////////////////////////////////////////
 };
 
 const float     cfg_V_TX[] =                       { 4*1.15,  4*1.1};   // TX Voltage Warning Level ORANGE, RED                              
-const uint8_t   cfg_RSSI[] =                       {40  , 30  };        // receiver signal strength indicator [0-127] Warning Level ORANGE, RED
-const uint16_t  cfg_Telemetry_Check_Interval =             8000;        // Tx Voltage, RSSI, A1 Voltage & A2 Voltage are to be checked every XXX ms. 
-const int16_t   cfg_FlightTimeTrigger_ThrottleVal =        -200;        // Throttle Value that triggers the Flight Timer
-const int16_t   cfg_VFMSteps[]={-256,-150,-50,50,150, 256};             // virtual flight mode switch steps
+const uint8_t   cfg_RSSI[] =                       {     40,     30};   // receiver signal strength indicator [0-127] Warning Level ORANGE, RED
+const uint16_t  cfg_Telemetry_Check_Interval      =             8000;   // Tx Voltage, RSSI, A1 Voltage & A2 Voltage are to be checked every XXX ms. 
+const int16_t   cfg_FlightTimeTrigger_ThrottleVal =             -200;   // Throttle Value that triggers the Flight Timer
+const int16_t   cfg_VFMSteps[] =    { -256, -110, -40, 256, 110, 40};   // virtual flight mode switch steps
 
-// use the AnalogReadSerial.ino sketch to determine the MIN, MID and MAX values for the main analog inputs
+// HINT: use the AnalogReadSerial.ino sketch to determine the MIN, MID and MAX values for the main analog inputs
 const t5x::AnalogSettings_t cfg_AnalogSettings[]=
 {                                   //    Calibration     ChannelReverse  Comment
   {{93,   520,  965}, true},        //A0 {MIN, MID, MAX}, ChannelReverse  AIL

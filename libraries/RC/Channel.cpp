@@ -143,10 +143,7 @@ uint16_t Channel::apply(int16_t p_value)
 
 uint16_t Channel::apply()
 {
-	if (m_source != rc::Output_None)
 	  return apply(rc::getOutput(m_source));
-	else
-	  return 0;
 }
 
 

@@ -7,12 +7,12 @@ namespace t5x
 // T5x allows to switch between models and handle them differently
 typedef struct
 {
-    int8_t        AilExpo[3];
-    int8_t        EleExpo[3];
-    int8_t        RudExpo[3];
-    uint8_t       AilDR[3];
-    uint8_t       EleDR[3];
-    uint8_t       RudDR[3];
+    int8_t        AilExpo[6];
+    int8_t        EleExpo[6];
+    int8_t        RudExpo[6];
+    uint8_t       AilDR[6];
+    uint8_t       EleDR[6];
+    uint8_t       RudDR[6];
 
     float         V_A1[2];    
     float         V_A2[2];
