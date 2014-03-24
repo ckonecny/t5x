@@ -171,10 +171,11 @@ const t5x::SwitchSettings_t cfg_SwitchSettings[]=
 
 
 // which of the 2 3-pos switches SW2 or SW3 is the primary one for selecting the active profile?
-//#define T5X_PROFILE_SW2_PRIMARY        // switch state 0-2. SW2+3*SW3 SW2:[0,1,2] + SW3:[0,3,6] 
-#define T5X_PROFILE_SW3_PRIMARY          // switch state 0-2. SW3+3*SW2 SW3:[0,1,2] + SW2:[0,3,6]
+//#define T5X_PROFILE_SW2_PRIMARY        // SW2+3*SW3 SW2:[0,1,2] + SW3:[0,3,6] = 0-8
+#define T5X_PROFILE_SW3_PRIMARY          // SW3+3*SW2 SW3:[0,1,2] + SW2:[0,3,6] = 0-8
 
-// choose one from the two 3-state switches SW2 or SW3 which one should be evaluated for selecting active flightmode
+// which of the 2 3-pos switches SW2 or SW3 is used for selecting active flightmode?
+// note: when using virtual flight mode switch, also bi-state switch SW1 will contribute 
 //#define T5X_SW2_SELECTS_FLIGHTMODE     // SW2 selects the active flightmode during normal operation
 #define T5X_SW3_SELECTS_FLIGHTMODE       // SW3 selects the active flightmode during normal operation
 
