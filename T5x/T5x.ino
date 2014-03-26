@@ -126,17 +126,23 @@ rc::PPMOut g_PPMOut(ChannelCount);
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
-t5x::Frsky g_Frsky;
-rc::FlightTimer g_Timer;
-int16_t g_TimerSecAtPaused=0;
+t5x::Frsky      g_Frsky;                // global frsky telemetry object 
+rc::FlightTimer g_Timer;                // global flight timer
+int16_t         g_TimerSecAtPaused = 0; // to start a new timer after pause
+unsigned long   now                = 0; // for scheduling
+unsigned long   pmon_last          = 0; // only needed to verify loop time
+unsigned long   last_telemetry     = 0; // for scheduling
+unsigned long   last_flight_timer  = 0; // for scheduling
+uint8_t          g_ActiveProfile   = 0; // active profile selected by the user via 3-pos switch
 
-unsigned long now               = 0;
-unsigned long pmon_last         = 0; // only needed to verify loop time
-unsigned long last_telemetry    = 0;
-unsigned long last_flight_timer = 0;
-
-uint8_t      g_ActiveProfile=0;   // holds the active profile selected by the user via 3-pos switch
-
+int8_t getChannelPosition(char aChar)
+// return the channel position of the given character as per definition in the model profile
+// if not found, return -
+{
+  char* pChar = strchr(cfg_Profile[g_ActiveProfile].ChannelOrder, aChar);
+  if (pChar!=NULL) return int(pChar)-int(cfg_Profile[g_ActiveProfile].ChannelOrder);
+  else return -1;
+}
 
 void setup()
 {
@@ -155,16 +161,15 @@ void setup()
   	g_ActiveProfile=(2-g_SW3.read())+((2-g_SW2.read())*3);
 #endif
 
-        String tChannelOrder = String(cfg_Profile[g_ActiveProfile].ChannelOrder);
-        int8_t j=tChannelOrder.indexOf('A'); if (j>-1) g_channels[j].setSource(rc::Output_AIL1);
-               j=tChannelOrder.indexOf('E'); if (j>-1) g_channels[j].setSource(rc::Output_ELE1);
-               j=tChannelOrder.indexOf('T'); if (j>-1) g_channels[j].setSource(rc::Output_THR1);
-               j=tChannelOrder.indexOf('R'); if (j>-1) g_channels[j].setSource(rc::Output_RUD1);
-               j=tChannelOrder.indexOf('1'); if (j>-1) g_channels[j].setSource(rc::Output_AUX1);
-               j=tChannelOrder.indexOf('2'); if (j>-1) g_channels[j].setSource(rc::Output_AUX2);
-               j=tChannelOrder.indexOf('3'); if (j>-1) g_channels[j].setSource(rc::Output_AUX3);
-               j=tChannelOrder.indexOf('P'); if (j>-1) g_channels[j].setSource(rc::Output_AUX4);
-               
+        int8_t j=getChannelPosition('A'); if (j>-1) g_channels[j].setSource(rc::Output_AIL1);
+               j=getChannelPosition('E'); if (j>-1) g_channels[j].setSource(rc::Output_ELE1);
+               j=getChannelPosition('T'); if (j>-1) g_channels[j].setSource(rc::Output_THR1);
+               j=getChannelPosition('R'); if (j>-1) g_channels[j].setSource(rc::Output_RUD1);
+               j=getChannelPosition('1'); if (j>-1) g_channels[j].setSource(rc::Output_AUX1);
+               j=getChannelPosition('2'); if (j>-1) g_channels[j].setSource(rc::Output_AUX2);
+               j=getChannelPosition('3'); if (j>-1) g_channels[j].setSource(rc::Output_AUX3);
+               j=getChannelPosition('P'); if (j>-1) g_channels[j].setSource(rc::Output_AUX4);
+
         // initialize expo and dualrate objects with the profile specific values
         for (uint8_t i=0; i < 6; i++)
         {
@@ -211,19 +216,19 @@ void setup()
 	rc::setTravel(700);  // max servo travel from center point
 	// our output signal will lie between 920 and 2120 microseconds (1520 +/- 600)
 	
+	// fill channel values buffer with same values, all centered
+        j=getChannelPosition('A'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
+        j=getChannelPosition('E'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
+        j=getChannelPosition('T'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(-256));
+        j=getChannelPosition('R'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
+        j=getChannelPosition('1'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
+        j=getChannelPosition('2'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
+        j=getChannelPosition('3'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
+        j=getChannelPosition('P'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
+        j=getChannelPosition('M'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
+        j=getChannelPosition('-'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));        
 
-	// fill channel values buffer with sane values, all centered
-        j=tChannelOrder.indexOf('A'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
-        j=tChannelOrder.indexOf('E'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
-        j=tChannelOrder.indexOf('T'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(-256));
-        j=tChannelOrder.indexOf('R'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
-        j=tChannelOrder.indexOf('1'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
-        j=tChannelOrder.indexOf('2'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
-        j=tChannelOrder.indexOf('3'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
-        j=tChannelOrder.indexOf('P'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
-        j=tChannelOrder.indexOf('M'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
-        j=tChannelOrder.indexOf('-'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));        
-         
+
 	// set up PPM
 	g_PPMOut.setPulseLength(400);   // default pulse length used by FrSky hardware
 	g_PPMOut.setPauseLength(20000); // default frame length used by FrSky hardware
