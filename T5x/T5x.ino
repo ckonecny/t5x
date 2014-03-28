@@ -312,17 +312,22 @@ void loop()
 
         now = millis();  
 
-        if ((now - last_telemetry >= cfg_Telemetry_Check_Interval)) {
+        if ((now - last_telemetry >= cfg_Telemetry_Check_Interval)) 
+        {
           last_telemetry = now;
           float voltageTX = analogRead(T5X_TX_VOLT_PIN)*0.0146627565982405; // 0-15V in 1023 steps or 0,0146V per step
           if (voltageTX < cfg_V_TX[RED]) rc::g_Buzzer.beep(10,10,2);
           else if (voltageTX < cfg_V_TX[ORANGE]) rc::g_Buzzer.beep(20);
 
-          if (g_Frsky.m_A1_Voltage*0.0517647058823529 < cfg_Profile[g_ActiveProfile].V_A1[RED]) rc::g_Buzzer.beep(10,10,2);     //  0-13,2V in 255 steps or 0,052V per step
-          else if (g_Frsky.m_A1_Voltage*0.0517647058823529 < cfg_Profile[g_ActiveProfile].V_A1[ORANGE]) rc::g_Buzzer.beep(20);  //  0-13,2V in 255 steps or 0,052V per step
+          if (g_Frsky.TelemetryLinkAlive())
+          {
+            if (g_Frsky.m_A1_Voltage*0.0517647058823529 < cfg_Profile[g_ActiveProfile].V_A1[RED]) rc::g_Buzzer.beep(10,10,2);     //  0-13,2V in 255 steps or 0,052V per step
+            else if (g_Frsky.m_A1_Voltage*0.0517647058823529 < cfg_Profile[g_ActiveProfile].V_A1[ORANGE]) rc::g_Buzzer.beep(20);  //  0-13,2V in 255 steps or 0,052V per step
 
-          if (g_Frsky.m_RSSI < cfg_RSSI[RED]) rc::g_Buzzer.beep(10,10,2);
-          else if (g_Frsky.m_RSSI < cfg_RSSI[ORANGE]) rc::g_Buzzer.beep(20);
+            if (g_Frsky.m_RSSI < cfg_RSSI[RED]) rc::g_Buzzer.beep(10,10,2);
+            else if (g_Frsky.m_RSSI < cfg_RSSI[ORANGE]) rc::g_Buzzer.beep(20);
+          }
+          else  rc::g_Buzzer.beep(10,10,2);
         }
 
 
