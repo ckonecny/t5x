@@ -36,7 +36,7 @@ void Frsky::update()
 const boolean Frsky::TelemetryLinkAlive()
 {
   unsigned long tNow = millis();
-  if (tNow - m_LastValidFrameMillis < 100) return true;
+  if (tNow - m_LastValidFrameMillis < 500) return true;
   else return false;
 }
 
