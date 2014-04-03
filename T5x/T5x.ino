@@ -135,6 +135,14 @@ unsigned long   last_telemetry     = 0; // for scheduling
 unsigned long   last_flight_timer  = 0; // for scheduling
 uint8_t          g_ActiveProfile   = 0; // active profile selected by the user via 3-pos switch
 
+enum            OperatingMode_t
+{
+   OperatingMode_Normal,
+   OperatingMode_Setup
+};  
+
+OperatingMode_t g_OperatingMode   = OperatingMode_Normal;
+
 int8_t getChannelPosition(char aChar)
 // return the channel position of the given character as per definition in the model profile
 // if not found, return -
@@ -146,6 +154,11 @@ int8_t getChannelPosition(char aChar)
 
 void setup()
 {
+        if (analogRead(T5X_TX_VOLT_PIN)<20)    // if power is off, we have only little rustling numbers below 5 or so...
+          g_OperatingMode=OperatingMode_Setup;
+        else 
+          g_OperatingMode=OperatingMode_Normal;
+  
         Serial.begin(9600);    // telemetry
         
         // initialize switches working direction. maybe user wants to let them work in the other direction
@@ -237,6 +250,10 @@ void setup()
         delay(1500);
         rc::g_Buzzer.beep(20, 10, g_ActiveProfile);      // beep g_ActiveProfile times
         delay(3000);
+
+        if (g_OperatingMode==OperatingMode_Setup)
+          rc::g_Buzzer.beep(5, 2, 20);                 // signal that we are in setup mode
+
         
         g_Timer.setTarget(cfg_Profile[g_ActiveProfile].Timer);
         g_Timer.setDirection(false);                     // count down timer
@@ -244,6 +261,9 @@ void setup()
 
 void loop()
 {
+  
+   if (g_OperatingMode==OperatingMode_Normal)
+   {
 	rc::SwitchState SW1State = g_SW1.read();
 
 #ifdef T5X_SW2_SELECTS_FLIGHTMODE
@@ -348,6 +368,20 @@ void loop()
             g_TimerSecAtPaused=g_Timer.getTime();
   	  }
         }
+   }
+   else // g_OperatingMode==OperatingMode_Setup
+   {
+     // first dummy version of Setup Mode simply shows analog values on the serial
+     Serial.print(" A0:");    Serial.print(analogRead(A0));
+     Serial.print(" A1:");    Serial.print(analogRead(A1));
+     Serial.print(" A2:");    Serial.print(analogRead(A2));
+     Serial.print(" A3:");    Serial.print(analogRead(A3));
+     Serial.print(" A4:");    Serial.print(analogRead(A4));
+     Serial.print(" A5:");    Serial.print(analogRead(A5));
+     Serial.print(" A6:");    Serial.print(analogRead(A6));
+     Serial.print(" A7:");    Serial.print(analogRead(A7));
+     Serial.print("\n");   
+   }
 
 //        Serial.println(now-pmon_last);      // for loop time measurment
 //        pmon_last=now;                      // to get a feeling of performance...

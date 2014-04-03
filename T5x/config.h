@@ -5,9 +5,9 @@
 const t5x::Profile_t cfg_Profile[] =
 {
  { ///////////////////// PROFILE 1 ////////////////////////////////////////////////////////////////////////
-  {  0,  0,  0,  0,  0,  0},  // AILERON EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
-  {  0,  0,  0,  0,  0,  0},  // ELEVON  EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
-  {  0,  0,  0,  0,  0,  0},  // RUDDER  EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
+  { 30, 30, 30,  0,  0,  0},  // AILERON EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
+  { 30, 30, 30,  0,  0,  0},  // ELEVON  EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
+  { 30, 30, 30,  0,  0,  0},  // RUDDER  EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
 
   {100,100,100,100,100,100},  // AILERON DUAL RATE [0/+140]   Flight Mode 1 2 3 4 5 6
   {100,100,100,100,100,100},  // ELEVON  DUAL RATE [0/+140]   Flight Mode 1 2 3 4 5 6
@@ -15,14 +15,14 @@ const t5x::Profile_t cfg_Profile[] =
 
   {2*3.5, 2*3.3},             // TELEMETRY A1 VOLTAGE Warning Level ORANGE, RED
   {0,0},                      // TELEMETRY A2 VOLTAGE Warning Level ORANGE, RED (Note: without divider 0-3,3V in 255 steps or 0,013V per step)  
-  600,                        // FLIGHT TIMER (seconds)
+  420,                        // FLIGHT TIMER (seconds)
   "AETR123P"                  // Channel Order AIL, ELE, TRH, RUD, AUX1 (SW1), AUX2 (SW2), AUX3 (SW3), AUX4 (POT1)
  }, ////////////////////////////////////////////////////////////////////////////////////////////////////////
  
  {  ///////////////////// PROFILE 2 ////////////////////////////////////////////////////////////////////////
-  {  0,  0,  0,  0,  0,  0},  // AILERON EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
-  {  0,  0,  0,  0,  0,  0},  // ELEVON  EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
-  {  0,  0,  0,  0,  0,  0},  // RUDDER  EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
+  { 40, 40, 40,  0,  0,  0},  // AILERON EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
+  { 40, 40, 40,  0,  0,  0},  // ELEVON  EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
+  { 40, 40, 40,  0,  0,  0},  // RUDDER  EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
 
   {100,100,100,100,100,100},  // AILERON DUAL RATE [0/+140]   Flight Mode 1 2 3 4 5 6
   {100,100,100,100,100,100},  // ELEVON  DUAL RATE [0/+140]   Flight Mode 1 2 3 4 5 6
@@ -30,14 +30,14 @@ const t5x::Profile_t cfg_Profile[] =
 
   {0.0, 0.0},                 // TELEMETRY A1 VOLTAGE Warning Level ORANGE, RED
   {0,0},                      // TELEMETRY A2 VOLTAGE Warning Level ORANGE, RED (Note: without divider 0-3,3V in 255 steps or 0,013V per step)  
-  600,                        // FLIGHT TIMER (seconds)
-  "AETRMP2-"                  // VFM: Channel Order AIL, ELE, TRH, RUD, VIRTUAL MODE SWITCH (SW1/SW3), POT1, SW2, NOTHING
+  420,                        // FLIGHT TIMER (seconds)
+  "AETR123P"                  // Channel Order AIL, ELE, TRH, RUD, AUX1 (SW1), AUX2 (SW2), AUX3 (SW3), AUX4 (POT1)
  },  ////////////////////////////////////////////////////////////////////////////////////////////////////////
  
  {  ///////////////////// PROFILE 3 ////////////////////////////////////////////////////////////////////////
-  {  0, 30, 50,  0,  0,  0},  // AILERON EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
-  {  0, 30, 50,  0,  0,  0},  // ELEVON  EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
-  {  0, 30, 50,  0,  0,  0},  // RUDDER  EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
+  { 50, 50, 50,  0,  0,  0},  // AILERON EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
+  { 50, 50, 50,  0,  0,  0},  // ELEVON  EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
+  { 50, 50, 50,  0,  0,  0},  // RUDDER  EXPO [-100/+100]     Flight Mode 1 2 3 4 5 6
 
   {100,100,100,100,100,100},  // AILERON DUAL RATE [0/+140]   Flight Mode 1 2 3 4 5 6
   {100,100,100,100,100,100},  // ELEVON  DUAL RATE [0/+140]   Flight Mode 1 2 3 4 5 6
@@ -45,7 +45,7 @@ const t5x::Profile_t cfg_Profile[] =
 
   {0.0, 0.0},                 // TELEMETRY A1 VOLTAGE Warning Level ORANGE, RED
   {0.0 ,0.0},                 // TELEMETRY A2 VOLTAGE Warning Level ORANGE, RED (Note: without divider 0-3,3V in 255 steps or 0,013V per step)  
-  600,                        // FLIGHT TIMER (seconds)
+  420,                        // FLIGHT TIMER (seconds)
   "AETR123P"                  // Channel Order AIL, ELE, TRH, RUD, AUX1 (SW1), AUX2 (SW2), AUX3 (SW3), AUX4 (POT1)
  }, ////////////////////////////////////////////////////////////////////////////////////////////////////////
  
@@ -147,7 +147,7 @@ const uint16_t  cfg_Telemetry_Check_Interval      =             8000;   // Tx Vo
 const int16_t   cfg_FlightTimeTrigger_ThrottleVal =             -200;   // Throttle Value that triggers the Flight Timer
 const int16_t   cfg_VFMSteps[] =    { -256, -110, -40, 256, 110, 40};   // virtual flight mode switch steps
 
-// HINT: use the AnalogReadSerial.ino sketch to determine the MIN, MID and MAX values for the main analog inputs
+// HINT: use the setup mode to determine the MIN, MID and MAX values for the analog inputs
 const t5x::AnalogSettings_t cfg_AnalogSettings[]=
 {                                   //    Calibration     ChannelReverse  Comment
   {{93,   520,  965}, true},        //A0 {MIN, MID, MAX}, ChannelReverse  AIL
