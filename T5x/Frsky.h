@@ -3,7 +3,7 @@
 namespace t5x
 {
 
-#define FRAMESIZE 11
+#define T5X_FRSKY_TELEMETRY_FRAMESIZE 11
 
 class Frsky 
 {
@@ -18,7 +18,7 @@ class Frsky
     uint8_t         m_RSSI;
 
   private:
-    uint8_t         m_Data[FRAMESIZE];
+    uint8_t         m_Data[T5X_FRSKY_TELEMETRY_FRAMESIZE];
     uint8_t         m_Counter;
     unsigned long   m_LastValidFrameMillis;
 };

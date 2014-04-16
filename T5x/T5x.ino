@@ -44,14 +44,17 @@
 #include <Buzzer.h>
 #include <Timer2.h>
 #include <FlightTimer.h>
+#include <arduino.h>
+#include <EEPROM.h>
 
 // t5x includes
+#include "TxDeviceProperties.h"
+#include "Profile.h"
+#include "RealtimeData.h"
 #include "config.h"
 #include "Frsky.h"
+#include "util.h"
 
-// warning levels for Telemetry Stuff
-#define ORANGE 0
-#define RED    1
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -122,20 +125,27 @@ rc::Channel g_channels[ChannelCount] =
 rc::PPMOut g_PPMOut(ChannelCount);
 
 
-
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
+t5x::TxDeviceProperties gTxDevice;
+t5x::Profile            gProfile;
+t5x::RealtimeData       gRealtime;
+t5x::Frsky              g_Frsky;                // global frsky telemetry object 
 
-t5x::Frsky      g_Frsky;                // global frsky telemetry object 
-rc::FlightTimer g_Timer;                // global flight timer
-int16_t         g_TimerSecAtPaused = 0; // to start a new timer after pause
-unsigned long   now                = 0; // for scheduling
-unsigned long   pmon_last          = 0; // only needed to verify loop time
-unsigned long   last_telemetry     = 0; // for scheduling
-unsigned long   last_flight_timer  = 0; // for scheduling
-uint8_t          g_ActiveProfile   = 0; // active profile selected by the user via 3-pos switch
+rc::FlightTimer         gTimer;                // global flight timer
+int16_t                 gTimerSecAtPaused = 0; // to start a new timer after pause
 
-enum            OperatingMode_t
+unsigned long           now                = 0; // for scheduling
+unsigned long           last               = 0; // measure loop time
+unsigned long           last_telemetry     = 0; // for scheduling
+unsigned long           last_flight_timer  = 0; // to create a new timer after pause
+unsigned long           last_realtime_data = 0; // for setup mode only
+
+byte                    gRxBuffer[100];         // Receive Buffer
+uint8_t                 byteCount          = 0; // reveived bytes
+
+
+enum OperatingMode_t
 {
    OperatingMode_Normal,
    OperatingMode_Setup
@@ -147,62 +157,110 @@ int8_t getChannelPosition(char aChar)
 // return the channel position of the given character as per definition in the model profile
 // if not found, return -
 {
-  char* pChar = strchr(cfg_Profile[g_ActiveProfile].ChannelOrder, aChar);
-  if (pChar!=NULL) return int(pChar)-int(cfg_Profile[g_ActiveProfile].ChannelOrder);
+  char* pChar = strchr(gProfile.m_Data.ChannelOrder, aChar);
+  if (pChar!=NULL) return int(pChar)-int(gProfile.m_Data.ChannelOrder);
   else return -1;
+}
+
+
+
+void applyDeviceSettings()
+{
+    // initialize switches working direction. maybe user wants to let them work in the other direction
+    g_SW1.setReverse(gTxDevice.m_Properties.SwitchSettings[0].Reverse);
+    g_SW2.setReverse(gTxDevice.m_Properties.SwitchSettings[1].Reverse);
+    g_SW3.setReverse(gTxDevice.m_Properties.SwitchSettings[2].Reverse);
+    
+    // set calibration values, these depend on hardware configurations
+    for(int i=0; i<4; i++)  // calibrate/reverse gimbals for AIL, ELE, THR, RUD
+    {
+        g_aPins[i].setCalibration(gTxDevice.m_Properties.AnalogSettings[i].Calibration[0], gTxDevice.m_Properties.AnalogSettings[i].Calibration[1],  gTxDevice.m_Properties.AnalogSettings[i].Calibration[2]);
+        g_aPins[i].setReverse(gTxDevice.m_Properties.AnalogSettings[i].Reverse);  
+	}
+	
+    g_Pot1.setCalibration(gTxDevice.m_Properties.AnalogSettings[6].Calibration[0], gTxDevice.m_Properties.AnalogSettings[6].Calibration[1],  gTxDevice.m_Properties.AnalogSettings[6].Calibration[2]);
+    g_Pot1.setReverse(gTxDevice.m_Properties.AnalogSettings[6].Reverse);      
+}
+
+
+void applyProfile()
+{
+    int8_t j=getChannelPosition('A'); if (j>-1) g_channels[j].setSource(rc::Output_AIL1);
+           j=getChannelPosition('E'); if (j>-1) g_channels[j].setSource(rc::Output_ELE1);
+           j=getChannelPosition('T'); if (j>-1) g_channels[j].setSource(rc::Output_THR1);
+           j=getChannelPosition('R'); if (j>-1) g_channels[j].setSource(rc::Output_RUD1);
+           j=getChannelPosition('1'); if (j>-1) g_channels[j].setSource(rc::Output_AUX1);
+           j=getChannelPosition('2'); if (j>-1) g_channels[j].setSource(rc::Output_AUX2);
+           j=getChannelPosition('3'); if (j>-1) g_channels[j].setSource(rc::Output_AUX3);
+           j=getChannelPosition('P'); if (j>-1) g_channels[j].setSource(rc::Output_AUX4);
+
+    // initialize expo and dualrate objects with the profile specific values
+    for (uint8_t i=0; i < 6; i++)
+    {
+        g_ailExpo[i].set(gProfile.m_Data.AilExpo[i]);
+        g_eleExpo[i].set(gProfile.m_Data.EleExpo[i]);
+        g_rudExpo[i].set(gProfile.m_Data.RudExpo[i]);
+          g_ailDR[i].set(gProfile.m_Data.AilDR[i]  );
+          g_eleDR[i].set(gProfile.m_Data.EleDR[i]  );
+          g_rudDR[i].set(gProfile.m_Data.RudDR[i]  );
+    }
+    
+    // fill channel values buffer with same values, all centered
+    j=getChannelPosition('A'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
+    j=getChannelPosition('E'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
+    j=getChannelPosition('T'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(-256));
+    j=getChannelPosition('R'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
+    j=getChannelPosition('1'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
+    j=getChannelPosition('2'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
+    j=getChannelPosition('3'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
+    j=getChannelPosition('P'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
+    j=getChannelPosition('M'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
+    j=getChannelPosition('-'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));        
+    
+    gTimer.setTarget(gProfile.m_Data.Timer);
+    gTimer.setDirection(false);                     // count down timer
+  
 }
 
 void setup()
 {
+  	// Initialize timer
+	rc::Timer1::init();
+	rc::Timer2::init();
+
+        Serial.begin(9600);    // telemetry/configuration
+
+#ifdef T5X_CONDITIONAL_INITIALIZE_EEPROM        
+        if (t5x::EEPROMVersionIsInvalid())
+        {
+          gTxDevice.init();
+          gProfile.init();
+          t5x::SetValidEEPROMVersion();
+        }
+#endif        
+
+        gTxDevice.load();      // load device settings either from EEPROM or ROM, depending on, if T5X_USE_EEPROM is defined
+        applyDeviceSettings();
+
         if (analogRead(T5X_TX_VOLT_PIN)<20)    // if power is off, we have only little rustling numbers below 5 or so...
           g_OperatingMode=OperatingMode_Setup;
         else 
           g_OperatingMode=OperatingMode_Normal;
-  
-        Serial.begin(9600);    // telemetry
-        
-        // initialize switches working direction. maybe user wants to let them work in the other direction
-        g_SW1.setReverse(cfg_SwitchSettings[0].Reverse);
-        g_SW2.setReverse(cfg_SwitchSettings[1].Reverse);
-        g_SW3.setReverse(cfg_SwitchSettings[2].Reverse);
-        
+
          
-         // read both 3-pos switches for determining the actual profile to be used
-#ifdef T5X_PROFILE_SW2_PRIMARY
-  	g_ActiveProfile=(2-g_SW2.read())+((2-g_SW3.read())*3);
-#else
-  	g_ActiveProfile=(2-g_SW3.read())+((2-g_SW2.read())*3);
-#endif
+        if (gTxDevice.m_Properties.Sw2IsPrimaryProfileSelector) 
+          gRealtime.m_Data.ProfileId=(2-g_SW2.read())+((2-g_SW3.read())*3);
+        else
+          gRealtime.m_Data.ProfileId=(2-g_SW3.read())+((2-g_SW2.read())*3);
 
-        int8_t j=getChannelPosition('A'); if (j>-1) g_channels[j].setSource(rc::Output_AIL1);
-               j=getChannelPosition('E'); if (j>-1) g_channels[j].setSource(rc::Output_ELE1);
-               j=getChannelPosition('T'); if (j>-1) g_channels[j].setSource(rc::Output_THR1);
-               j=getChannelPosition('R'); if (j>-1) g_channels[j].setSource(rc::Output_RUD1);
-               j=getChannelPosition('1'); if (j>-1) g_channels[j].setSource(rc::Output_AUX1);
-               j=getChannelPosition('2'); if (j>-1) g_channels[j].setSource(rc::Output_AUX2);
-               j=getChannelPosition('3'); if (j>-1) g_channels[j].setSource(rc::Output_AUX3);
-               j=getChannelPosition('P'); if (j>-1) g_channels[j].setSource(rc::Output_AUX4);
 
-        // initialize expo and dualrate objects with the profile specific values
-        for (uint8_t i=0; i < 6; i++)
-        {
-            g_ailExpo[i].set(cfg_Profile[g_ActiveProfile].AilExpo[i]);
-            g_eleExpo[i].set(cfg_Profile[g_ActiveProfile].EleExpo[i]);
-            g_rudExpo[i].set(cfg_Profile[g_ActiveProfile].RudExpo[i]);
-              g_ailDR[i].set(cfg_Profile[g_ActiveProfile].AilDR[i]  );
-              g_eleDR[i].set(cfg_Profile[g_ActiveProfile].EleDR[i]  );
-              g_rudDR[i].set(cfg_Profile[g_ActiveProfile].RudDR[i]  );
-        }
-  
-  
- 
-	// Initialize timer
-	rc::Timer1::init();
-	rc::Timer2::init();
+        gProfile.load(gRealtime.m_Data.ProfileId);
+        applyProfile();
+         
 	
          // read switch to enable/disable buzzer (silence mode)
   	rc::SwitchState tSwitchState = g_SW1.read();
-        if (tSwitchState == rc::SwitchState_Up)     
+        if ((tSwitchState == rc::SwitchState_Up) and (g_OperatingMode==OperatingMode_Normal))   
         {
           rc::g_Buzzer.setPin(T5X_TX_BUZZER_PIN);  // buzzer on -  NORMAL MODE
           digitalWrite(T5X_TX_LED_PIN, HIGH);      // turn the LED steady on
@@ -214,33 +272,9 @@ void setup()
         
 
 
-	// set calibration values, these depend on hardware configurations
-        for(int i=0; i<4; i++)  // calibrate/reverse gimbals for AIL, ELE, THR, RUD
-        {
-            g_aPins[i].setCalibration(cfg_AnalogSettings[i].Calibration[0], cfg_AnalogSettings[i].Calibration[1],  cfg_AnalogSettings[i].Calibration[2]);
-            g_aPins[i].setReverse(cfg_AnalogSettings[i].Reverse);  
-    	}
-	
-        g_Pot1.setCalibration(cfg_AnalogSettings[6].Calibration[0], cfg_AnalogSettings[6].Calibration[1],  cfg_AnalogSettings[6].Calibration[2]);
-        g_Pot1.setReverse(cfg_AnalogSettings[6].Reverse);      
-	
         // set up normalized -> microseconds conversion
-	rc::setCenter(1500); // servo center point
-	rc::setTravel(700);  // max servo travel from center point
-	// our output signal will lie between 920 and 2120 microseconds (1520 +/- 600)
-	
-	// fill channel values buffer with same values, all centered
-        j=getChannelPosition('A'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
-        j=getChannelPosition('E'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
-        j=getChannelPosition('T'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(-256));
-        j=getChannelPosition('R'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
-        j=getChannelPosition('1'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
-        j=getChannelPosition('2'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
-        j=getChannelPosition('3'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
-        j=getChannelPosition('P'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
-        j=getChannelPosition('M'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));
-        j=getChannelPosition('-'); if (j>-1) rc::setOutputChannel(rc::OutputChannel(j), rc::normalizedToMicros(0));        
-
+	rc::setCenter(T5X_PPM_CENTER); 
+	rc::setTravel(T5X_PPM_TRAVEL);  
 
 	// set up PPM
 	g_PPMOut.setPulseLength(400);   // default pulse length used by FrSky hardware
@@ -248,38 +282,33 @@ void setup()
 	g_PPMOut.start(9); // use pin 9, which is preferred as it's faster
 
         delay(1500);
-        rc::g_Buzzer.beep(20, 10, g_ActiveProfile);      // beep g_ActiveProfile times
+        rc::g_Buzzer.beep(20, 10, gRealtime.m_Data.ProfileId);      // beep gRealtime.m_Data.ProfileId times
         delay(3000);
 
         if (g_OperatingMode==OperatingMode_Setup)
-          rc::g_Buzzer.beep(5, 2, 20);                 // signal that we are in setup mode
-
-        
-        g_Timer.setTarget(cfg_Profile[g_ActiveProfile].Timer);
-        g_Timer.setDirection(false);                     // count down timer
+          rc::g_Buzzer.beep(5, 2, 20);                    // signal that we are in setup mode        
 }
 
 void loop()
 {
-  
-   if (g_OperatingMode==OperatingMode_Normal)
-   {
-	rc::SwitchState SW1State = g_SW1.read();
+        int16_t throttle_val=0;
+        
+	gRealtime.m_Data.SwitchState[0] = g_SW1.read();
+	gRealtime.m_Data.SwitchState[1] = g_SW2.read();
+	gRealtime.m_Data.SwitchState[2] = g_SW3.read();
 
-#ifdef T5X_SW2_SELECTS_FLIGHTMODE
-	rc::SwitchState fSwitchState = g_SW2.read();
-	g_SW3.read();
-#else
-	rc::SwitchState fSwitchState = g_SW3.read();
-	g_SW2.read();
-#endif
+        rc::SwitchState fSwitchState = rc::SwitchState_Disconnected;
+        if (gTxDevice.m_Properties.Sw2SelectsFlightMode) 
+      	  fSwitchState = rc::SwitchState(gRealtime.m_Data.SwitchState[1]);
+        else
+ 	  fSwitchState = rc::SwitchState(gRealtime.m_Data.SwitchState[2]);
 
-        int flightmode = 0;
-        if      (fSwitchState == rc::SwitchState_Down  ) flightmode = 0;
-        else if (fSwitchState == rc::SwitchState_Center) flightmode = 1;
-        else if (fSwitchState == rc::SwitchState_Up    ) flightmode = 2;
+        gRealtime.m_Data.FlightMode = 0;
+        if      (fSwitchState == rc::SwitchState_Down  ) gRealtime.m_Data.FlightMode = 0;
+        else if (fSwitchState == rc::SwitchState_Center) gRealtime.m_Data.FlightMode = 1;
+        else if (fSwitchState == rc::SwitchState_Up    ) gRealtime.m_Data.FlightMode = 2;
 
-        if ((SW1State==rc::SwitchState_Up) && (strchr(cfg_Profile[g_ActiveProfile].ChannelOrder,'M')!=NULL)) flightmode=flightmode+3;  // virtual flightmode active? if so, evaluate switch 2 for that purpose
+        if ((gRealtime.m_Data.SwitchState[0]==rc::SwitchState_Up) && (strchr(gProfile.m_Data.ChannelOrder,'M')!=NULL)) gRealtime.m_Data.FlightMode=gRealtime.m_Data.FlightMode+3;  // virtual flightmode active? if so, evaluate switch 2 for that purpose
   
 	g_AnalogSW1.update();  // update the input system
 	g_AnalogSW2.update();  // update the input system
@@ -287,22 +316,19 @@ void loop()
 
 	
 	// read analog values, these write to the input system (AIL, ELE, THR, RUD & POT1)
-      	                       g_aPins[0].read(); // aileron
-	                       g_aPins[1].read(); // elevator
-	int16_t throttle_val = g_aPins[2].read(); // throttle (we need the value to trigger the timer)
-	                       g_aPins[3].read(); // rudder
-
+        for (int i=0; i<4; i++) g_aPins[i].read(); 
+       
         g_Pot1.read();
 
         
 	// apply expo and dual rates to input, these read from and write to input system
-	g_ailExpo[flightmode].apply();
-	g_eleExpo[flightmode].apply();
-	g_rudExpo[flightmode].apply();
+	g_ailExpo[gRealtime.m_Data.FlightMode].apply();
+	g_eleExpo[gRealtime.m_Data.FlightMode].apply();
+	g_rudExpo[gRealtime.m_Data.FlightMode].apply();
 
-	g_rudDR[flightmode].apply();
-	g_eleDR[flightmode].apply();
-	g_ailDR[flightmode].apply();
+	g_rudDR[gRealtime.m_Data.FlightMode].apply();
+	g_eleDR[gRealtime.m_Data.FlightMode].apply();
+	g_ailDR[gRealtime.m_Data.FlightMode].apply();
 
         g_aileron.apply();
         g_elevator.apply();
@@ -316,75 +342,174 @@ void loop()
 	// perform channel transformations and set channel values
 	for (uint8_t i = 0; i < ChannelCount; ++i)
         {
-          switch (cfg_Profile[g_ActiveProfile].ChannelOrder[i])
+          switch (gProfile.m_Data.ChannelOrder[i])
           {          
-            case '-':   g_channels[i].apply(0);                        break;   // ensure empty channel remains 0.
-            case 'M':   g_channels[i].apply(cfg_VFMSteps[flightmode]); break;   // apply virtual mode switch value according to flight mode 
-            default:    g_channels[i].apply();                                  // apply value from InputToOutputPipe
+            case '-':   gRealtime.m_Data.Channel_us[i]=g_channels[i].apply(0);                                                            break;   // ensure empty channel remains 0.
+            case 'M':   gRealtime.m_Data.Channel_us[i]=g_channels[i].apply(gTxDevice.m_Properties.VFMSteps[gRealtime.m_Data.FlightMode]); break;   // apply virtual mode switch value according to flight mode 
+            case 'T':   gRealtime.m_Data.Channel_us[i]=g_channels[i].apply(); throttle_val = gRealtime.m_Data.Channel_us[i];              break;
+            default:    gRealtime.m_Data.Channel_us[i]=g_channels[i].apply();                                                                      // apply value from InputToOutputPipe
           }
         }
 
 	// Tell PPMOut that new values are ready
 	g_PPMOut.update();
+        
+        last=now;
+        now = millis(); 
 
-
+   if (g_OperatingMode==OperatingMode_Normal)
+   {
         g_Frsky.update();    // read telemetry data from serial link and update the values
 
-        now = millis();  
-
-        if ((now - last_telemetry >= cfg_Telemetry_Check_Interval)) 
+        if ((now - last_telemetry >= gTxDevice.m_Properties.TelemetrySettings.Check_Interval*1000)) 
         {
           last_telemetry = now;
           float voltageTX = analogRead(T5X_TX_VOLT_PIN)*0.0146627565982405; // 0-15V in 1023 steps or 0,0146V per step
-          if (voltageTX < cfg_V_TX[RED]) rc::g_Buzzer.beep(10,10,2);
-          else if (voltageTX < cfg_V_TX[ORANGE]) rc::g_Buzzer.beep(20);
+          if (voltageTX < gTxDevice.m_Properties.TelemetrySettings.V_TX[T5X_CELLCOUNT]*gTxDevice.m_Properties.TelemetrySettings.V_TX[T5X_RED]/10.0) rc::g_Buzzer.beep(10,10,2);
+          else if (voltageTX < gTxDevice.m_Properties.TelemetrySettings.V_TX[T5X_CELLCOUNT]*gTxDevice.m_Properties.TelemetrySettings.V_TX[T5X_ORANGE]/10.0) rc::g_Buzzer.beep(20);
 
           if (g_Frsky.TelemetryLinkAlive())
           {
-            if (g_Frsky.m_A1_Voltage*0.0517647058823529 < cfg_Profile[g_ActiveProfile].V_A1[RED]) rc::g_Buzzer.beep(10,10,2);     //  0-13,2V in 255 steps or 0,052V per step
-            else if (g_Frsky.m_A1_Voltage*0.0517647058823529 < cfg_Profile[g_ActiveProfile].V_A1[ORANGE]) rc::g_Buzzer.beep(20);  //  0-13,2V in 255 steps or 0,052V per step
+            if (g_Frsky.m_A1_Voltage*0.0517647058823529 < gProfile.m_Data.V_A1[T5X_CELLCOUNT]*gProfile.m_Data.V_A1[T5X_RED]/10.0) rc::g_Buzzer.beep(10,10,2);     //  0-13,2V in 255 steps or 0,052V per step
+            else if (g_Frsky.m_A1_Voltage*0.0517647058823529 < gProfile.m_Data.V_A1[T5X_CELLCOUNT]*gProfile.m_Data.V_A1[T5X_ORANGE]/10.0) rc::g_Buzzer.beep(20);  //  0-13,2V in 255 steps or 0,052V per step
 
-            if (g_Frsky.m_RSSI < cfg_RSSI[RED]) rc::g_Buzzer.beep(10,10,2);
-            else if (g_Frsky.m_RSSI < cfg_RSSI[ORANGE]) rc::g_Buzzer.beep(20);
+            if (g_Frsky.m_RSSI < gTxDevice.m_Properties.TelemetrySettings.RSSIPercent[T5X_RED]*255/100) rc::g_Buzzer.beep(10,10,2);
+            else if (g_Frsky.m_RSSI < gTxDevice.m_Properties.TelemetrySettings.RSSIPercent[T5X_ORANGE]*255/100) rc::g_Buzzer.beep(20);
           }
           else  rc::g_Buzzer.beep(10,10,2);
         }
 
-
-        if (now - last_flight_timer >= 1000)
-        {
-          if (throttle_val > cfg_FlightTimeTrigger_ThrottleVal)  
-          {
-            if (g_TimerSecAtPaused==0) g_Timer.update(true);
-            else
-            {
-              g_Timer.setTarget(g_TimerSecAtPaused);
-              g_TimerSecAtPaused=0;
-            }
-          }
-          else
-          {
-            g_Timer.update(false);
-            g_TimerSecAtPaused=g_Timer.getTime();
-  	  }
-        }
    }
    else // g_OperatingMode==OperatingMode_Setup
    {
-     // first dummy version of Setup Mode simply shows analog values on the serial
-     Serial.print(" A0:");    Serial.print(analogRead(A0));
-     Serial.print(" A1:");    Serial.print(analogRead(A1));
-     Serial.print(" A2:");    Serial.print(analogRead(A2));
-     Serial.print(" A3:");    Serial.print(analogRead(A3));
-     Serial.print(" A4:");    Serial.print(analogRead(A4));
-     Serial.print(" A5:");    Serial.print(analogRead(A5));
-     Serial.print(" A6:");    Serial.print(analogRead(A6));
-     Serial.print(" A7:");    Serial.print(analogRead(A7));
-     Serial.print("\n");   
+
+      if (now - last_flight_timer >= 1000)
+      {
+        last_flight_timer = now;
+        if ((50*(throttle_val-T5X_PPM_CENTER-T5X_PPM_TRAVEL)/T5X_PPM_TRAVEL+100) > gTxDevice.m_Properties.FlightTimeTrigger_ThrottlePercent)  
+        {
+          if (gTimerSecAtPaused==0) gTimer.update(true);
+          else
+          {
+            gTimer.setTarget(gTimerSecAtPaused);
+            gTimerSecAtPaused=0;
+          }
+        }
+        else
+        {
+          gTimer.update(false);
+          gTimerSecAtPaused=gTimer.getTime();
+	}
+      }
+
+
+     while (Serial.available()) 
+     {
+        byte b = Serial.read();  
+              
+        if      ( (byteCount==0) && (b==0xFE))   gRxBuffer[byteCount++]=b;  // first header byte 
+        else if ( (byteCount==1) && (b==0xFE))   gRxBuffer[byteCount++]=b;  // 2nd header byte
+        else if (  byteCount==2)
+        {
+          if(
+              (b==T5X_MSG_TXDEVICE_PROPERTIES_REQ_MSGID) 
+              || 
+              (b==T5X_MSG_PROFILE_DATA_REQ_MSGID) 
+              || 
+              (b==T5X_MSG_PROFILE_DATA_APPLY_MSGID)
+              ||
+              (b==T5X_MSG_TXDEVICE_PROPERTIES_APPLY_MSGID)
+              ||
+              (b==T5X_MSG_SAVE_CONFIG_TO_EEPROM_MSGID)
+            )   
+             gRxBuffer[byteCount++]=b;  // valid message ID?
+            else
+              byteCount=0;
+        }
+        else if (byteCount>2)
+        {
+          switch (gRxBuffer[2])
+          {
+            case T5X_MSG_TXDEVICE_PROPERTIES_REQ_MSGID:            
+
+                gTxDevice.send();
+                byteCount=0;           
+                break;
+            
+
+            case T5X_MSG_PROFILE_DATA_REQ_MSGID:
+
+                gProfile.send();
+                byteCount=0;           
+                break;
+                
+            case T5X_MSG_PROFILE_DATA_APPLY_MSGID:
+            
+                gRxBuffer[byteCount]=b;
+                
+                if (byteCount<(sizeof(gProfile.m_Data)+2))  
+                {              
+                  byteCount++;
+                }
+                else
+                {
+                  rc::g_Buzzer.beep(5, 2, 1);              
+                  byteCount=0;
+                  gProfile.receive(gRxBuffer);
+                  applyProfile();    // apply gProfile to actual Tx
+                }
+                  
+                break;
+            
+            case T5X_MSG_TXDEVICE_PROPERTIES_APPLY_MSGID:
+
+                gRxBuffer[byteCount]=b;
+                
+                if (byteCount<(sizeof(gTxDevice.m_Properties)+2))  
+                {              
+                  byteCount++;
+                }
+                else
+                {
+                  rc::g_Buzzer.beep(5, 2, 1);              
+                  byteCount=0;
+                  gTxDevice.receive(gRxBuffer);
+                  applyDeviceSettings(); 
+                }
+                   
+                break;
+  
+             case T5X_MSG_SAVE_CONFIG_TO_EEPROM_MSGID:            
+                rc::g_Buzzer.beep(3, 2, 10); 
+                gTxDevice.save();
+                gProfile.save(gRealtime.m_Data.ProfileId);               
+                byteCount=0;           
+                break;
+                
+            default:
+                byteCount=0;  
+          }  
+        }        
+     }
+    
+      if (now - last_realtime_data > 60)   // we report real time data only every now and then, otherwise we would get misleading looptime values caused only because of serial communication...
+      {
+        last_realtime_data=now;
+        gRealtime.m_Data.Analog[0]=analogRead(A0);
+        gRealtime.m_Data.Analog[1]=analogRead(A1);
+        gRealtime.m_Data.Analog[2]=analogRead(A2);
+        gRealtime.m_Data.Analog[3]=analogRead(A3);
+        gRealtime.m_Data.Analog[4]=analogRead(A4);
+        gRealtime.m_Data.Analog[5]=analogRead(A5);
+        gRealtime.m_Data.Analog[6]=analogRead(A6);
+        gRealtime.m_Data.Analog[7]=analogRead(A7);
+        
+        gRealtime.m_Data.FlightTimerSec=gTimer.getTime();
+  
+        gRealtime.m_Data.FreeRAM=freeRam();
+        gRealtime.m_Data.LoopTime=now-last;
+  
+        gRealtime.send();
+      }
    }
-
-//        Serial.println(now-pmon_last);      // for loop time measurment
-//        pmon_last=now;                      // to get a feeling of performance...
 }
-
-
