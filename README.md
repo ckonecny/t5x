@@ -11,9 +11,16 @@ The board has also a voltage sensor for the transmitter battery as well as a lev
 
 Instructions: 
 - extract the archive's content into your Arduino Project folder, e.g. C:\Users\<your username>\Documents\Arduino 
-- upload AnalogReadSerial to your T5x transmitter, open serial monitor with 9600baud and note down your individual calibration values for each analog input.
-  note: telemetry uses the same serial port. so either only connect USB but do not power on the transmitter, or disconnect telemetry while doing this step.
-- make your configurations in config.h, compile and enjoy!
+- compile and upload to your transmitter
+- connect with [t5x configurator](https://github.com/ckonecny/t5x_configurator) while the transmitter is turned off
+- do your configuration. hit apply button to see changes immediatly, press save button to save the settings into EEPROM
+- enjoy your T5x.
+- HINT: If you want - there is no need to - you can comment out after the first successful boot of the t5x in config.h the line
+#define T5X_CONDITIONAL_INITIALIZE_EEPROM 
+compile again and upload to the transmitter. doing that way results in smaller ROM-file and more RAM available.
+- if you have problems with the configurator, or just want a simple setup with all that bells and whistles, config.h allows to disable EEPROM handling by commenting out the line
+#define T5X_USE_EEPROM
+when doing that, configuration can be done hardcoded via TxDeviceProperties.h and Profile.h by modifying the default structures for both.
 
 
 have fun & great greetings from vienna, austria!
