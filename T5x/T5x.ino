@@ -373,9 +373,8 @@ void loop()
             if (g_Frsky.m_A1_Voltage*0.0517647058823529 < gProfile.m_Data.V_A1[T5X_CELLCOUNT]*gProfile.m_Data.V_A1[T5X_RED]/10.0) rc::g_Buzzer.beep(10,10,2);     //  0-13,2V in 255 steps or 0,052V per step
             else if (g_Frsky.m_A1_Voltage*0.0517647058823529 < gProfile.m_Data.V_A1[T5X_CELLCOUNT]*gProfile.m_Data.V_A1[T5X_ORANGE]/10.0) rc::g_Buzzer.beep(20);  //  0-13,2V in 255 steps or 0,052V per step
 
-            if (g_Frsky.m_A2_Voltage*0.0129411764706*6 < gProfile.m_Data.V_A2[T5X_CELLCOUNT]*gProfile.m_Data.V_A2[T5X_RED]/10.0) rc::g_Buzzer.beep(10,10,2);      //  0-3,3V in 255 steps or 0,013V per step, hardcoded voltage divider 1:6 (0-19,8V)
-            else if (g_Frsky.m_A2_Voltage*0.0129411764706*6 < gProfile.m_Data.V_A2[T5X_CELLCOUNT]*gProfile.m_Data.V_A2[T5X_ORANGE]/10.0) rc::g_Buzzer.beep(20);   //  0-3,3V in 255 steps or 0.013V per step, hardcoded voltage divider 1:6 (0-19,8V)
-                                                                                                                                                                  //  hardcoded voltage divider just for the first quick run. will be configurable lateron
+            if (g_Frsky.m_A2_Voltage*0.0129411764706*((gProfile.m_Data.V_A2[T5X_CELLCOUNT] & 0xF0) >> 4) < (gProfile.m_Data.V_A2[T5X_CELLCOUNT] & 0x0F)*gProfile.m_Data.V_A2[T5X_RED]/10.0) rc::g_Buzzer.beep(10,10,2);      //  0-3,3V in 255 steps or 0,013V per step, the real voltage range is actually defined by the voltage divider ratio 
+            else if (g_Frsky.m_A2_Voltage*0.0129411764706*((gProfile.m_Data.V_A2[T5X_CELLCOUNT] & 0xF0) >> 4) < (gProfile.m_Data.V_A2[T5X_CELLCOUNT] & 0x0F)*gProfile.m_Data.V_A2[T5X_ORANGE]/10.0) rc::g_Buzzer.beep(20);   //  0-3,3V in 255 steps or 0.013V per step, the real voltage range is actually defined by the voltage divider ratio 
 
             if (g_Frsky.m_RSSI < gTxDevice.m_Properties.TelemetrySettings.RSSIPercent[T5X_RED]*255/100) rc::g_Buzzer.beep(10,10,2);
             else if (g_Frsky.m_RSSI < gTxDevice.m_Properties.TelemetrySettings.RSSIPercent[T5X_ORANGE]*255/100) rc::g_Buzzer.beep(20);
