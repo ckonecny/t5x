@@ -365,8 +365,8 @@ void loop()
         {
           last_telemetry = now;
           float voltageTX = analogRead(T5X_TX_VOLT_PIN)*0.0146627565982405; // 0-15V in 1023 steps or 0,0146V per step
-          if (voltageTX < gTxDevice.m_Properties.TelemetrySettings.V_TX[T5X_CELLCOUNT]*gTxDevice.m_Properties.TelemetrySettings.V_TX[T5X_RED]/10.0) rc::g_Buzzer.beep(10,10,2);
-          else if (voltageTX < gTxDevice.m_Properties.TelemetrySettings.V_TX[T5X_CELLCOUNT]*gTxDevice.m_Properties.TelemetrySettings.V_TX[T5X_ORANGE]/10.0) rc::g_Buzzer.beep(20);
+          if (voltageTX < gTxDevice.m_Properties.TelemetrySettings.V_TX[T5X_CELLCOUNT]*gTxDevice.m_Properties.TelemetrySettings.V_TX[T5X_RED]/10.0) rc::g_Buzzer.beep(5,5,2);
+          else if (voltageTX < gTxDevice.m_Properties.TelemetrySettings.V_TX[T5X_CELLCOUNT]*gTxDevice.m_Properties.TelemetrySettings.V_TX[T5X_ORANGE]/10.0) rc::g_Buzzer.beep(50);
 
           if (g_Frsky.TelemetryLinkAlive())
           {
@@ -385,26 +385,6 @@ void loop()
    }
    else // g_OperatingMode==OperatingMode_Setup
    {
-
-      if (now - last_flight_timer >= 1000)
-      {
-        last_flight_timer = now;
-        if ((50*(throttle_val-T5X_PPM_CENTER-T5X_PPM_TRAVEL)/T5X_PPM_TRAVEL+100) > gTxDevice.m_Properties.FlightTimeTrigger_ThrottlePercent)  
-        {
-          if (gTimerSecAtPaused==0) gTimer.update(true);
-          else
-          {
-            gTimer.setTarget(gTimerSecAtPaused);
-            gTimerSecAtPaused=0;
-          }
-        }
-        else
-        {
-          gTimer.update(false);
-          gTimerSecAtPaused=gTimer.getTime();
-	}
-      }
-
 
      while (Serial.available()) 
      {
@@ -515,4 +495,24 @@ void loop()
         gRealtime.send();
       }
    }
+   
+    if (now - last_flight_timer >= 1000)
+    {
+      last_flight_timer = now;
+      if ((50*(throttle_val-T5X_PPM_CENTER-T5X_PPM_TRAVEL)/T5X_PPM_TRAVEL+100) > gTxDevice.m_Properties.FlightTimeTrigger_ThrottlePercent)  
+      {
+        if (gTimerSecAtPaused==0) gTimer.update(true);
+        else
+        {
+          gTimer.setTarget(gTimerSecAtPaused);
+          gTimerSecAtPaused=0;
+        }
+      }
+      else
+      {
+        gTimer.update(false);
+        gTimerSecAtPaused=gTimer.getTime();
+    	}
+    }
+
 }
