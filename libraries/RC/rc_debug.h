@@ -18,6 +18,9 @@
 // Include for program space related macros
 #include <avr/pgmspace.h>
 
+typedef char PROGMEM prog_char;			// patched by ckonecny to remain compatible 
+typedef uint8_t PROGMEM prog_uint8_t;		// with latest IDE
+
 // include global config settings first
 #include <rc_config.h>
 
